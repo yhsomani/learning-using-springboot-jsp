@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.io.File;
 import java.time.LocalDateTime;
+import com.ruraledu.exception.CourseNotFoundException;
 
 @Service
 public class CertificateService {
@@ -77,8 +78,8 @@ public class CertificateService {
     }
 
     public byte[] getCertificateData(Long studentId, Long courseId) throws java.io.IOException {
-        Certificate cert = certificateRepository.findByUserIdAndCourseId(studentId, courseId).orElse(null);
-        if (cert == null) return null;
+        Certificate cert = certificateRepository.findByUserIdAndCourseId(studentId, courseId)
+                .orElseThrow(() -> new CourseNotFoundException("Certificate not found for course " + courseId));
         
         File file = new File(cert.getCertificateUrl());
         if (!file.exists()) return null;
