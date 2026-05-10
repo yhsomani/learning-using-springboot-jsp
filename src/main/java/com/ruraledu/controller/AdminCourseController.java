@@ -86,6 +86,9 @@ public class AdminCourseController {
             );
         }).collect(Collectors.toList());
 
+        if (lessons.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Course must have at least one valid video to be imported."));
+        }
         final Course savedCourse = courseService.saveCourseWithLessons(course, lessons);
 
         return ResponseEntity.ok(Map.of(
