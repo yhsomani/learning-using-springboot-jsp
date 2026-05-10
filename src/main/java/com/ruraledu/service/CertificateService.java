@@ -4,6 +4,7 @@ import com.ruraledu.entity.User;
 import com.ruraledu.entity.Course;
 import com.ruraledu.entity.Certificate;
 import com.ruraledu.repository.CertificateRepository;
+import com.ruraledu.exception.CourseNotFoundException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -78,7 +79,9 @@ public class CertificateService {
 
     public byte[] getCertificateData(Long studentId, Long courseId) throws java.io.IOException {
         Certificate cert = certificateRepository.findByUserIdAndCourseId(studentId, courseId).orElse(null);
-        if (cert == null) return null;
+        if (cert == null) {
+            throw new CourseNotFoundException("Course not found or no certificate exists for course ID: " + courseId);
+        }
         
         File file = new File(cert.getCertificateUrl());
         if (!file.exists()) return null;
