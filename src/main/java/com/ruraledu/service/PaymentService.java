@@ -22,6 +22,10 @@ public class PaymentService {
 
     @Transactional
     public Payment processPayment(User user, Course course, Double amount) {
+        if (amount == null || amount <= 0.0) {
+            throw new IllegalArgumentException("Payment amount must be greater than zero");
+        }
+
         // In a real scenario, this would call Stripe/Razorpay API
         // Here we simulate a successful transaction
         
