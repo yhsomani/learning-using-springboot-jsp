@@ -37,43 +37,50 @@ public class CertificateService {
                 System.out.println("DEBUG: Created parents: " + created);
             }
 
-            try (PDDocument document = new PDDocument()) {
-                PDPage page = new PDPage();
-                document.addPage(page);
-
-                try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                    contentStream.beginText();
-                    contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 24);
-                    contentStream.newLineAtOffset(100, 700);
-                    contentStream.showText("CERTIFICATE OF COMPLETION");
-                    contentStream.endText();
-
-                    contentStream.beginText();
-                    contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 18);
-                    contentStream.newLineAtOffset(100, 650);
-                    contentStream.showText("This is to certify that " + student.getFullName());
-                    contentStream.newLineAtOffset(0, -30);
-                    contentStream.showText("has successfully completed the course:");
-                    contentStream.newLineAtOffset(0, -30);
-                    contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 20);
-                    contentStream.showText(course.getTitle());
-                    contentStream.endText();
-                }
-                document.save(file);
-                logger.info("Certificate generated successfully for student {} in course {}", student.getUsername(), course.getTitle());
-            }
-
-            Certificate cert = new Certificate();
-            cert.setUser(student);
-            cert.setCourse(course);
-            cert.setCertificateUrl(relativePath); // Store relative path
-            cert.setIssuedDate(LocalDateTime.now());
-            certificateRepository.save(cert);
+            generatePdfFile(student, course, file);
+            saveCertificateRecord(student, course, relativePath);
 
         } catch (Exception e) {
             logger.error("Error generating certificate for student {} in course {}: {}", 
                          student.getUsername(), course.getTitle(), e.getMessage(), e);
         }
+    }
+
+    private void generatePdfFile(User student, Course course, File file) throws java.io.IOException {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                contentStream.beginText();
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 24);
+                contentStream.newLineAtOffset(100, 700);
+                contentStream.showText("CERTIFICATE OF COMPLETION");
+                contentStream.endText();
+
+                contentStream.beginText();
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 18);
+                contentStream.newLineAtOffset(100, 650);
+                contentStream.showText("This is to certify that " + student.getFullName());
+                contentStream.newLineAtOffset(0, -30);
+                contentStream.showText("has successfully completed the course:");
+                contentStream.newLineAtOffset(0, -30);
+                contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 20);
+                contentStream.showText(course.getTitle());
+                contentStream.endText();
+            }
+            document.save(file);
+            logger.info("Certificate generated successfully for student {} in course {}", student.getUsername(), course.getTitle());
+        }
+    }
+
+    private void saveCertificateRecord(User student, Course course, String relativePath) {
+        Certificate cert = new Certificate();
+        cert.setUser(student);
+        cert.setCourse(course);
+        cert.setCertificateUrl(relativePath); // Store relative path
+        cert.setIssuedDate(LocalDateTime.now());
+        certificateRepository.save(cert);
     }
 
     public byte[] getCertificateData(Long studentId, Long courseId) throws java.io.IOException {
