@@ -1,5 +1,0 @@
-🧪 Handle CourseNotFoundException in CertificateService
-
-🎯 **What:** The `getCertificateData` method in `CertificateService` lacked proper error handling when a certificate couldn't be found. It returned null instead of throwing an explicit exception like `CourseNotFoundException`.
-📊 **Coverage:** A test class `CertificateServiceTest` has been created, covering the scenario where the repository returns an empty Optional, ensuring that `CourseNotFoundException` is correctly thrown.
-✨ **Result:** Improved test coverage and clear exception handling when querying for an unavailable certificate, preventing generic 404 or 500 errors and enabling better error mapping by the `GlobalExceptionHandler`.
