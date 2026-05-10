@@ -4,7 +4,6 @@ import com.ruraledu.entity.Course;
 import com.ruraledu.entity.Lesson;
 import com.ruraledu.entity.User;
 import com.ruraledu.repository.CourseRepository;
-import com.ruraledu.repository.LessonRepository;
 import com.ruraledu.service.YoutubeService;
 import com.ruraledu.service.UserService;
 import com.ruraledu.service.CourseService;
