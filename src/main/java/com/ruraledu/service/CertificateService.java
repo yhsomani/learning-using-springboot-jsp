@@ -10,6 +10,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.ruraledu.exception.CourseNotFoundException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.io.File;
@@ -78,7 +79,7 @@ public class CertificateService {
 
     public byte[] getCertificateData(Long studentId, Long courseId) throws java.io.IOException {
         Certificate cert = certificateRepository.findByUserIdAndCourseId(studentId, courseId).orElse(null);
-        if (cert == null) return null;
+        if (cert == null) throw new CourseNotFoundException("Certificate not found for student " + studentId + " in course " + courseId);
         
         File file = new File(cert.getCertificateUrl());
         if (!file.exists()) return null;
