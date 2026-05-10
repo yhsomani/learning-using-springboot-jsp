@@ -57,6 +57,7 @@
     </c:if>
 
     <form action="/login" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="mb-3">
             <label class="form-label small fw-bold text-muted">Username</label>
             <div class="input-group">

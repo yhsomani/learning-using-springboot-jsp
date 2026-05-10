@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/global.css">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -349,6 +351,8 @@
 
         document.getElementById('editUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
             const id = document.getElementById('editUserId').value;
             const data = {
                 fullName: document.getElementById('editFullName').value,
@@ -359,7 +363,10 @@
             try {
                 const response = await fetch('/admin/users/' + id + '/update', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
                     body: JSON.stringify(data)
                 });
                 if (response.ok) {
@@ -372,8 +379,15 @@
 
         async function toggleUserStatus(userId) {
             if (confirm('Are you sure you want to change this user\'s status?')) {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
                 try {
-                    const response = await fetch('/admin/users/' + userId + '/toggle-status', { method: 'POST' });
+                    const response = await fetch('/admin/users/' + userId + '/toggle-status', {
+                        method: 'POST',
+                        headers: {
+                            [header]: token
+                        }
+                    });
                     if (response.ok) {
                         window.location.reload();
                     }
@@ -425,10 +439,15 @@
                 .map(cb => cb.getAttribute('data-id'));
             
             if (confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
                 try {
                     const response = await fetch('/admin/users/bulk-delete', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [header]: token
+                        },
                         body: JSON.stringify({ ids: selectedIds })
                     });
                     if (response.ok) {

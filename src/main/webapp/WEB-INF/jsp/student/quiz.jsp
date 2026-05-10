@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/global.css">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
     <style>
         :root {
             --primary: #10b981;
@@ -330,9 +332,14 @@
             document.getElementById('result-title').innerText = "Excellent Work!";
             document.getElementById('result-text').innerText = "You've mastered this topic and earned 50 points!";
             // Update points in backend (optional but recommended here)
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
             fetch('/api/gamification/add-points', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
                 body: JSON.stringify({ userId: ${user.id}, points: points })
             });
         } else {

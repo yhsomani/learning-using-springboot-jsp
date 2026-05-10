@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/global.css">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
     <style>
         .course-hero {
             padding: 80px 0;
@@ -302,10 +304,15 @@
     }
 
     async function updateProgressOnServer(lessonId, seconds, completed) {
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
         try {
             await fetch('/api/lessons/' + lessonId + '/progress', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
                 body: JSON.stringify({ 
                     watchedSeconds: seconds,
                     completed: completed
@@ -365,10 +372,15 @@
     });
 
     async function markComplete(lessonId, element) {
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
         try {
             const response = await fetch('/api/lessons/' + lessonId + '/complete', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                }
             });
             if (response.ok) {
                 const icon = element.querySelector('i.bi-play-circle');
@@ -392,10 +404,15 @@
 
     document.getElementById('lowBandwidthToggle')?.addEventListener('change', async (e) => {
         const enabled = e.target.checked;
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
         try {
             await fetch('/api/settings/low-bandwidth', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
                 body: JSON.stringify({ enabled })
             });
             window.location.reload();
