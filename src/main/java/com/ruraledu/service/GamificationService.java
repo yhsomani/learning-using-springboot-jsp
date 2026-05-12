@@ -32,12 +32,14 @@ public class GamificationService {
         leaderboardRepository.deleteAll();
         List<User> topStudents = userRepository.findTopStudents(org.springframework.data.domain.PageRequest.of(0, 10));
 
+        List<LeaderboardEntry> entries = new java.util.ArrayList<>();
         for (int i = 0; i < topStudents.size(); i++) {
             LeaderboardEntry entry = new LeaderboardEntry();
             entry.setUser(topStudents.get(i));
             entry.setTotalPoints(topStudents.get(i).getPoints());
             entry.setRank(i + 1);
-            leaderboardRepository.save(entry);
+            entries.add(entry);
         }
+        leaderboardRepository.saveAll(entries);
     }
 }
