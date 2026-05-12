@@ -99,7 +99,7 @@ public class CertificateService {
     @Cacheable(value = "certificates", key = "#studentId + '_' + #courseId")
     public byte[] getCertificateData(Long studentId, Long courseId) throws java.io.IOException {
         Certificate cert = certificateRepository.findByUserIdAndCourseId(studentId, courseId).orElse(null);
-        if (cert == null) return null;
+        if (cert == null) throw new CourseNotFoundException("Certificate not found for student " + studentId + " in course " + courseId);
         
         File file = new File(cert.getCertificateUrl());
         if (!file.exists()) return null;

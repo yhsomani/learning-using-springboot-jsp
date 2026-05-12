@@ -199,10 +199,10 @@
                                                             <i class="bi bi-three-dots"></i>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3">
-                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="editUser(${u.id})"><i class="bi bi-pencil me-2"></i> Edit Details</a></li>
-                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleUserStatus(${u.id})"><i class="bi ${u.enabled ? 'bi-person-x' : 'bi-person-check'} me-2"></i> ${u.enabled ? 'Disable' : 'Enable'} User</a></li>
+                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="editUser('${u.id}')"><i class="bi bi-pencil me-2"></i> Edit Details</a></li>
+                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleUserStatus('${u.id}')"><i class="bi ${u.enabled ? 'bi-person-x' : 'bi-person-check'} me-2"></i> ${u.enabled ? 'Disable' : 'Enable'} User</a></li>
                                                             <li><hr class="dropdown-divider"></li>
-                                                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteUser(${u.id})"><i class="bi bi-trash me-2"></i> Delete Account</a></li>
+                                                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteUser('${u.id}')"><i class="bi bi-trash me-2"></i> Delete Account</a></li>
                                                         </ul>
                                                     </div>
                                                 </td>
