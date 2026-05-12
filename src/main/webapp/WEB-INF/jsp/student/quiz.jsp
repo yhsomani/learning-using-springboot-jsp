@@ -331,21 +331,47 @@
         if (percentage >= 80) {
             document.getElementById('result-title').innerText = "Excellent Work!";
             document.getElementById('result-text').innerText = "You've mastered this topic and earned 50 points!";
-            // Update points in backend (optional but recommended here)
-            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            
+            // Submit quiz to backend to mark course as complete
+            fetch('/api/courses/${course.id}/quiz/submit', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ score: percentage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Quiz submitted:', data);
+                if (data.passed) {
+                    // Course completed - certificate will be generated automatically
+                }
+            })
+            .catch(error => console.error('Error submitting quiz:', error));
+            
+            // Update points in backend
             fetch('/api/gamification/add-points', {
                 method: 'POST',
-                headers: {
+                headers: { 
                     'Content-Type': 'application/json',
-                    [header]: token
+                    'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({ userId: ${user.id}, points: points })
-            });
+            }).catch(error => console.error('Error adding points:', error));
         } else {
             document.getElementById('result-title').innerText = "Keep Practicing";
             document.getElementById('result-text').innerText = "You need 80% to earn points. Review the course material and try again!";
         }
+    }
+    
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
     }
 
     loadQuestion();
