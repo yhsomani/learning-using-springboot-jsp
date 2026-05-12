@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.ruraledu.exception.CourseNotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -221,6 +222,8 @@ public class ApiController {
                 .header("Content-Disposition", "attachment; filename=\"certificate.pdf\"")
                 .contentType(org.springframework.http.MediaType.valueOf("application/pdf"))
                 .body(data);
+        } catch (CourseNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error reading certificate file");
         }

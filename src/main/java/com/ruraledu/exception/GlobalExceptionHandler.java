@@ -14,6 +14,17 @@ public class GlobalExceptionHandler {
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(CourseNotFoundException.class)
+    public Object handleCourseNotFound(CourseNotFoundException ex, HttpServletRequest request) {
+        logger.warn("Course not found: {}", ex.getMessage());
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
+        }
+        ModelAndView mav = new ModelAndView("error/404");
+        mav.addObject("message", ex.getMessage());
+        return mav;
+    }
+
     @ExceptionHandler(UserAlreadyExistsException.class)
     public Object handleUserAlreadyExists(UserAlreadyExistsException ex, HttpServletRequest request) {
         String message = ex.getMessage() != null ? ex.getMessage() : "User already exists";

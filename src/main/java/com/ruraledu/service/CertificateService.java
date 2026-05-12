@@ -4,6 +4,7 @@ import com.ruraledu.entity.User;
 import com.ruraledu.entity.Course;
 import com.ruraledu.entity.Certificate;
 import com.ruraledu.repository.CertificateRepository;
+import com.ruraledu.exception.CourseNotFoundException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
