@@ -449,52 +449,6 @@ docker run -p 8081:8081 \
 
 ---
 
-## 🔧 Common Troubleshooting
-
-### ❌ `Schema-validation` or Database Migration Errors
-
-**Cause:** You may have run the application previously, and your local database schema is now out of sync with the latest entity definitions or Flyway scripts.
-
-**Fix:** Drop and recreate the database so Flyway runs all migrations fresh:
-```powershell
-& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -proot -e "DROP DATABASE IF EXISTS ruraleduhub; CREATE DATABASE ruraleduhub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-.\maven\bin\mvn.cmd spring-boot:run
-```
-
-### ❌ `Access denied for user 'root'@'localhost'`
-
-**Cause:** Wrong MySQL credentials in `application.properties` or environment variables.
-
-**Fix:** Verify MySQL is running and credentials are correct:
-```powershell
-& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -proot -e "SHOW DATABASES;"
-```
-
-### ❌ `HikariPool - Connection is not available`
-
-**Cause:** MySQL server is not running.
-
-**Fix:** Start MySQL service:
-```powershell
-# Windows
-net start MySQL80
-```
-
-### ❌ Login succeeds but redirected to "Access Restricted" page (Wrong Portal)
-
-**Cause:** The logged-in user's role doesn't match the requested portal URL.
-
-**Fix:** Each user role has its own portal:
-- Admin → `/admin/dashboard`
-- Teacher → `/teacher/dashboard`
-- Student → `/student/dashboard`
-- Parent → `/parent/dashboard`
-
-After login, you are automatically redirected to the correct portal via `/main/dashboard`.
-
-
----
-
 ## 🚢 Production Deployment Notes
 
 1. **Disable DDL auto**: Keep `spring.jpa.hibernate.ddl-auto=validate` (already set)
