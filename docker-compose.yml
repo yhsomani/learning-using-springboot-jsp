@@ -17,11 +17,7 @@ services:
       timeout: 20s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    container_name: ruraledu-redis
-    ports:
-      - "6379:6379"
+
 
   app:
     build: .
@@ -32,13 +28,9 @@ services:
       - DB_URL=jdbc:mysql://mysql:3306/ruraleduhub?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       - DB_USERNAME=root
       - DB_PASSWORD=root
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     depends_on:
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_started
 
 volumes:
   mysql_data:
