@@ -150,10 +150,19 @@ public class AdminController {
         java.io.PrintWriter writer = response.getWriter();
         writer.println("ID,Full Name,Email,Role,Points,Status");
         
-        for (User u : userRepository.findAll()) {
-            writer.println(String.format("%d,%s,%s,%s,%d,%s",
-                u.getId(), u.getFullName(), u.getEmail(), u.getRole(), u.getPoints(), u.isEnabled() ? "Active" : "Disabled"));
-        }
+        int page = 0;
+        int size = 1000;
+        org.springframework.data.domain.Page<User> userPage;
+
+        do {
+            userPage = userRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size));
+            for (User u : userPage.getContent()) {
+                writer.println(String.format("%d,%s,%s,%s,%d,%s",
+                    u.getId(), u.getFullName(), u.getEmail(), u.getRole(), u.getPoints(), u.isEnabled() ? "Active" : "Disabled"));
+            }
+            writer.flush();
+            page++;
+        } while (userPage.hasNext());
     }
 
     @GetMapping("/courses")
