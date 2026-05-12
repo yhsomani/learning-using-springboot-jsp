@@ -29,6 +29,10 @@ public class CourseService {
     @Transactional
     @CacheEvict(value = "courses", allEntries = true)
     public Course saveCourseWithLessons(Course course, List<Lesson> lessons) {
+        if (lessons == null || lessons.isEmpty()) {
+            throw new IllegalArgumentException("Course must have at least one lesson.");
+        }
+
         Course savedCourse = courseRepository.save(course);
         lessons.forEach(l -> l.setCourse(savedCourse));
         lessonRepository.saveAll(lessons);
