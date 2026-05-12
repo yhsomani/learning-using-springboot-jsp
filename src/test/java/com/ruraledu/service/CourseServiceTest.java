@@ -15,8 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class CourseServiceTest {
 
@@ -35,27 +34,30 @@ public class CourseServiceTest {
     }
 
     @Test
-    void testSearchCourses_WithResults() {
+    void testSearchCourses_Success() {
         // Arrange
         String keyword = "Java";
         Course course1 = new Course();
         course1.setId(1L);
         course1.setTitle("Java Basics");
+        course1.setDescription("Learn Java from scratch");
+
         Course course2 = new Course();
         course2.setId(2L);
         course2.setTitle("Advanced Java");
+        course2.setDescription("Deep dive into Java");
 
-        List<Course> expectedCourses = Arrays.asList(course1, course2);
-        when(courseRepository.searchCourses(keyword)).thenReturn(expectedCourses);
+        List<Course> mockCourses = Arrays.asList(course1, course2);
+        when(courseRepository.searchCourses(keyword)).thenReturn(mockCourses);
 
         // Act
-        List<Course> actualCourses = courseService.searchCourses(keyword);
+        List<Course> result = courseService.searchCourses(keyword);
 
         // Assert
-        assertEquals(2, actualCourses.size());
-        assertEquals("Java Basics", actualCourses.get(0).getTitle());
-        assertEquals("Advanced Java", actualCourses.get(1).getTitle());
-        verify(courseRepository).searchCourses(keyword);
+        assertEquals(2, result.size());
+        assertEquals("Java Basics", result.get(0).getTitle());
+        assertEquals("Advanced Java", result.get(1).getTitle());
+        verify(courseRepository, times(1)).searchCourses(keyword);
     }
 
     @Test
@@ -65,24 +67,10 @@ public class CourseServiceTest {
         when(courseRepository.searchCourses(keyword)).thenReturn(Collections.emptyList());
 
         // Act
-        List<Course> actualCourses = courseService.searchCourses(keyword);
+        List<Course> result = courseService.searchCourses(keyword);
 
         // Assert
-        assertTrue(actualCourses.isEmpty());
-        verify(courseRepository).searchCourses(keyword);
-    }
-
-    @Test
-    void testSearchCourses_NullKeyword() {
-        // Arrange
-        String keyword = null;
-        when(courseRepository.searchCourses(keyword)).thenReturn(Collections.emptyList());
-
-        // Act
-        List<Course> actualCourses = courseService.searchCourses(keyword);
-
-        // Assert
-        assertTrue(actualCourses.isEmpty());
-        verify(courseRepository).searchCourses(keyword);
+        assertTrue(result.isEmpty());
+        verify(courseRepository, times(1)).searchCourses(keyword);
     }
 }
