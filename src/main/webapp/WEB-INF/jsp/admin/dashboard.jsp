@@ -73,11 +73,11 @@
                     <div class="text-white-50 small fw-bold mb-3 px-3">OVERVIEW</div>
                     <a href="#overview" class="nav-link-admin active"><i class="bi bi-grid-1x2"></i> Dashboard</a>
                     <a href="#user-management" class="nav-link-admin"><i class="bi bi-people"></i> User Management</a>
-                    <a href="/admin/dashboard" class="nav-link-admin"><i class="bi bi-book"></i> Courses</a>
+                    <a href="/admin/courses" class="nav-link-admin"><i class="bi bi-book"></i> Courses</a>
                     
                     <div class="text-white-50 small fw-bold mt-4 mb-3 px-3">IMPACT</div>
                     <a href="#sdg-metrics" class="nav-link-admin"><i class="bi bi-globe"></i> SDG Metrics</a>
-                    <a href="/admin/dashboard" class="nav-link-admin"><i class="bi bi-award"></i> Certificates</a>
+                    <a href="/admin/certificates" class="nav-link-admin"><i class="bi bi-award"></i> Certificates</a>
                     
                     <div class="text-white-50 small fw-bold mt-4 mb-3 px-3">SYSTEM</div>
                     <a href="#system-alerts" class="nav-link-admin"><i class="bi bi-gear"></i> Settings</a>
