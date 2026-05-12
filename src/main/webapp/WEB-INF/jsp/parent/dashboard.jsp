@@ -278,6 +278,7 @@
                                     <li><a class="dropdown-item" href="/parent/dashboard">View Details</a></li>
                                     <li>
                                         <form action="/parent/remove-child" method="POST" onsubmit="return confirm('Are you sure you want to unlink this student?')">
+                                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                                             <input type="hidden" name="childId" value="${stat.user.id}">
                                             <button type="submit" class="dropdown-item text-danger">Unlink Student</button>
                                         </form>
@@ -334,6 +335,7 @@
             <div class="modal-body py-4">
                 <p class="text-muted mb-4">Enter your child's username to link their account and track their progress.</p>
                 <form action="/parent/add-child" method="POST">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Student Username</label>
                         <input type="text" name="childUsername" class="form-control" placeholder="e.g. aryan_123" required>

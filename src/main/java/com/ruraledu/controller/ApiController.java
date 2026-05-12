@@ -1,5 +1,7 @@
 package com.ruraledu.controller;
 
+import com.ruraledu.dto.PointsRequest;
+import com.ruraledu.dto.QuizSubmissionRequest;
 import com.ruraledu.entity.Course;
 import com.ruraledu.entity.User;
 import com.ruraledu.service.CourseService;
@@ -10,6 +12,7 @@ import com.ruraledu.repository.LessonRepository;
 import com.ruraledu.repository.EnrollmentRepository;
 import com.ruraledu.repository.CertificateRepository;
 import com.ruraledu.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -108,12 +111,19 @@ public class ApiController {
     }
 
     @PostMapping("/courses/{courseId}/quiz/submit")
-    public ResponseEntity<?> submitQuiz(@PathVariable Long courseId, @RequestBody Map<String, Object> request, Authentication authentication) {
+    public ResponseEntity<?> submitQuiz(@PathVariable Long courseId, 
+                                        @Valid @RequestBody QuizSubmissionRequest request, 
+                                        Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
-        int score = (Integer) request.get("score");
+        int score = request.getScore();
         Course course = courseService.getCourseById(courseId);
+        
+        // Validate courseId matches path variable
+        if (!course.getId().equals(courseId)) {
+            return ResponseEntity.badRequest().body("Course ID mismatch");
+        }
         
         Map<String, Object> response = new HashMap<>();
         if (score >= 80) {
@@ -133,11 +143,14 @@ public class ApiController {
     }
 
     @PostMapping("/gamification/add-points")
-    public ResponseEntity<?> addPoints(@RequestBody Map<String, Object> request, Authentication authentication) {
+    public ResponseEntity<?> addPoints(@Valid @RequestBody PointsRequest request, 
+                                       Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
 
-        int points = Integer.parseInt(request.get("points").toString());
+        int points = request.getPoints();
+        
+        // Additional business logic validation
         if (points > 50) {
             points = 50;
         } else if (points < 0) {
@@ -147,7 +160,13 @@ public class ApiController {
         user.setPoints(user.getPoints() + points);
         userService.updateUser(user);
 
-        return ResponseEntity.ok(Map.of("message", "Points added successfully", "totalPoints", user.getPoints()));
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Points added successfully");
+        response.put("totalPoints", user.getPoints());
+        response.put("actionType", request.getActionType());
+        response.put("entityId", request.getEntityId());
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/certificates/fix")

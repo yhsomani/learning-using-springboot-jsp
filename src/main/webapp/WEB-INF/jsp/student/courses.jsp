@@ -92,7 +92,7 @@
                     </div>
                     <h4 class="h5 fw-bold mb-3" style="color: var(--text-main)">${course.title}</h4>
                     <p class="small text-muted mb-4 flex-grow-1">
-                        ${course.description.length() > 120 ? course.description.substring(0, 120).concat('...') : course.description}
+                        ${course.description != null ? (course.description.length() > 120 ? course.description.substring(0, 120).concat('...') : course.description) : ''}
                     </p>
                     <div class="d-flex justify-content-between align-items-center pt-3 border-top border-opacity-10">
                         <div class="d-flex align-items-center">

@@ -27,22 +27,23 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public Object handleUserAlreadyExists(UserAlreadyExistsException ex, HttpServletRequest request) {
-        logger.warn("Registration conflict: {}", ex.getMessage());
+        String message = ex.getMessage() != null ? ex.getMessage() : "User already exists";
+        logger.warn("Registration conflict: {}", message);
         if (isApiRequest(request)) {
-            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", message));
         }
         ModelAndView mav = new ModelAndView("register");
-        mav.addObject("errorMessage", ex.getMessage());
+        mav.addObject("errorMessage", message);
         return mav;
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public Object handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        logger.warn("Access denied for {} on {}", request.getRemoteUser(), request.getRequestURI());
+        logger.warn("Access denied for {} on {}: {}", request.getRemoteUser(), request.getRequestURI(), ex.getMessage());
         if (isApiRequest(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access Denied"));
         }
-        return "error/403";
+        return new ModelAndView("error/403");
     }
 
     @ExceptionHandler(Exception.class)
