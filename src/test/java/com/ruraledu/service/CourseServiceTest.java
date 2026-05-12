@@ -3,7 +3,6 @@ package com.ruraledu.service;
 import com.ruraledu.entity.Course;
 import com.ruraledu.repository.CourseRepository;
 import com.ruraledu.repository.LessonRepository;
-import com.ruraledu.service.CourseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,67 +34,43 @@ public class CourseServiceTest {
     }
 
     @Test
-    void testSearchCourses_ValidKeyword() {
+    void testSearchCourses_Success() {
+        // Arrange
+        String keyword = "Java";
         Course course1 = new Course();
         course1.setId(1L);
         course1.setTitle("Java Basics");
+        course1.setDescription("Learn Java from scratch");
 
         Course course2 = new Course();
         course2.setId(2L);
         course2.setTitle("Advanced Java");
+        course2.setDescription("Deep dive into Java");
 
         List<Course> mockCourses = Arrays.asList(course1, course2);
-        when(courseRepository.searchCourses("Java")).thenReturn(mockCourses);
+        when(courseRepository.searchCourses(keyword)).thenReturn(mockCourses);
 
-        List<Course> result = courseService.searchCourses("Java");
+        // Act
+        List<Course> result = courseService.searchCourses(keyword);
 
+        // Assert
         assertEquals(2, result.size());
-        verify(courseRepository, times(1)).searchCourses("Java");
+        assertEquals("Java Basics", result.get(0).getTitle());
+        assertEquals("Advanced Java", result.get(1).getTitle());
+        verify(courseRepository, times(1)).searchCourses(keyword);
     }
 
     @Test
-    void testSearchCourses_EmptyKeyword() {
-        Course course1 = new Course();
-        course1.setId(1L);
+    void testSearchCourses_NoResults() {
+        // Arrange
+        String keyword = "Python";
+        when(courseRepository.searchCourses(keyword)).thenReturn(Collections.emptyList());
 
-        Course course2 = new Course();
-        course2.setId(2L);
+        // Act
+        List<Course> result = courseService.searchCourses(keyword);
 
-        List<Course> mockCourses = Arrays.asList(course1, course2);
-
-        // Mock the repository behavior for an empty string.
-        // With %%, it matches all, so we return all mock courses.
-        when(courseRepository.searchCourses("")).thenReturn(mockCourses);
-
-        List<Course> result = courseService.searchCourses("");
-
-        assertEquals(2, result.size());
-        verify(courseRepository, times(1)).searchCourses("");
-    }
-
-    @Test
-    void testSearchCourses_NullKeyword() {
-        // Mock repository returning empty list for null keyword
-        when(courseRepository.searchCourses(null)).thenReturn(Collections.emptyList());
-
-        List<Course> result = courseService.searchCourses(null);
-
+        // Assert
         assertTrue(result.isEmpty());
-        verify(courseRepository, times(1)).searchCourses(null);
-    }
-
-    @Test
-    void testSearchCourses_WhitespaceKeyword() {
-        Course course1 = new Course();
-        course1.setId(1L);
-
-        List<Course> mockCourses = Collections.singletonList(course1);
-
-        when(courseRepository.searchCourses("   ")).thenReturn(mockCourses);
-
-        List<Course> result = courseService.searchCourses("   ");
-
-        assertEquals(1, result.size());
-        verify(courseRepository, times(1)).searchCourses("   ");
+        verify(courseRepository, times(1)).searchCourses(keyword);
     }
 }

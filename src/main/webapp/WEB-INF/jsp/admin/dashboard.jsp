@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/global.css">
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -73,11 +75,11 @@
                     <div class="text-white-50 small fw-bold mb-3 px-3">OVERVIEW</div>
                     <a href="#overview" class="nav-link-admin active"><i class="bi bi-grid-1x2"></i> Dashboard</a>
                     <a href="#user-management" class="nav-link-admin"><i class="bi bi-people"></i> User Management</a>
-                    <a href="/admin/dashboard" class="nav-link-admin"><i class="bi bi-book"></i> Courses</a>
+                    <a href="/admin/courses" class="nav-link-admin"><i class="bi bi-book"></i> Courses</a>
                     
                     <div class="text-white-50 small fw-bold mt-4 mb-3 px-3">IMPACT</div>
                     <a href="#sdg-metrics" class="nav-link-admin"><i class="bi bi-globe"></i> SDG Metrics</a>
-                    <a href="/admin/dashboard" class="nav-link-admin"><i class="bi bi-award"></i> Certificates</a>
+                    <a href="/admin/certificates" class="nav-link-admin"><i class="bi bi-award"></i> Certificates</a>
                     
                     <div class="text-white-50 small fw-bold mt-4 mb-3 px-3">SYSTEM</div>
                     <a href="#system-alerts" class="nav-link-admin"><i class="bi bi-gear"></i> Settings</a>
@@ -193,14 +195,14 @@
                                                 </td>
                                                 <td>
                                                     <div class="dropdown">
-                                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown">
+                                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-label="More actions for ${u.username}">
                                                             <i class="bi bi-three-dots"></i>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3">
-                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="editUser(${u.id})"><i class="bi bi-pencil me-2"></i> Edit Details</a></li>
-                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleUserStatus(${u.id})"><i class="bi ${u.enabled ? 'bi-person-x' : 'bi-person-check'} me-2"></i> ${u.enabled ? 'Disable' : 'Enable'} User</a></li>
+                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="editUser('${u.id}')"><i class="bi bi-pencil me-2"></i> Edit Details</a></li>
+                                                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="toggleUserStatus('${u.id}')"><i class="bi ${u.enabled ? 'bi-person-x' : 'bi-person-check'} me-2"></i> ${u.enabled ? 'Disable' : 'Enable'} User</a></li>
                                                             <li><hr class="dropdown-divider"></li>
-                                                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteUser(${u.id})"><i class="bi bi-trash me-2"></i> Delete Account</a></li>
+                                                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="deleteUser('${u.id}')"><i class="bi bi-trash me-2"></i> Delete Account</a></li>
                                                         </ul>
                                                     </div>
                                                 </td>
@@ -349,6 +351,8 @@
 
         document.getElementById('editUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
             const id = document.getElementById('editUserId').value;
             const data = {
                 fullName: document.getElementById('editFullName').value,
@@ -359,7 +363,10 @@
             try {
                 const response = await fetch('/admin/users/' + id + '/update', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
                     body: JSON.stringify(data)
                 });
                 if (response.ok) {
@@ -372,8 +379,15 @@
 
         async function toggleUserStatus(userId) {
             if (confirm('Are you sure you want to change this user\'s status?')) {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
                 try {
-                    const response = await fetch('/admin/users/' + userId + '/toggle-status', { method: 'POST' });
+                    const response = await fetch('/admin/users/' + userId + '/toggle-status', {
+                        method: 'POST',
+                        headers: {
+                            [header]: token
+                        }
+                    });
                     if (response.ok) {
                         window.location.reload();
                     }
@@ -425,10 +439,15 @@
                 .map(cb => cb.getAttribute('data-id'));
             
             if (confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
                 try {
                     const response = await fetch('/admin/users/bulk-delete', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [header]: token
+                        },
                         body: JSON.stringify({ ids: selectedIds })
                     });
                     if (response.ok) {

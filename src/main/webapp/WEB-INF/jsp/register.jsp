@@ -60,6 +60,7 @@
     </c:if>
 
     <form action="/register" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label small fw-bold text-muted">Full Name</label>

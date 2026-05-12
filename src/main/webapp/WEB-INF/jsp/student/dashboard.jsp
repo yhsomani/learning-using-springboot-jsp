@@ -176,7 +176,7 @@
                                     </div>
                                     <p class="small text-muted mb-4">
                                         <c:choose>
-                                            <c:when test="${c.description.length() > 100}">
+                                            <c:when test="${c.description != null && c.description.length() > 100}">
                                                 ${c.description.substring(0, 100)}...
                                             </c:when>
                                             <c:otherwise>
