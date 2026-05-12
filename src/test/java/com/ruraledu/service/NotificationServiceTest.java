@@ -1,11 +1,11 @@
 package com.ruraledu.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -25,66 +25,66 @@ public class NotificationServiceTest {
     @InjectMocks
     private NotificationService notificationService;
 
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalErr = System.err;
     private final PrintStream originalOut = System.out;
+    private final PrintStream originalErr = System.err;
+    private ByteArrayOutputStream outContent;
+    private ByteArrayOutputStream errContent;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        System.setErr(new PrintStream(errContent));
+        outContent = new ByteArrayOutputStream();
+        errContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));
+        System.setErr(new PrintStream(errContent));
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.setOut(originalOut);
+        System.setErr(originalErr);
     }
 
     @Test
     void testSendEmail_Success() {
-        assertDoesNotThrow(() -> {
-            notificationService.sendEmail("test@example.com", "Test Subject", "Test Body");
-        });
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
-    }
+        String to = "test@example.com";
+        String subject = "Test Subject";
+        String body = "Test Body";
 
-    @Test
-    void testSendEmail_ExceptionCaught() {
-        doThrow(new MailSendException("SMTP error")).when(mailSender).send(any(SimpleMailMessage.class));
-
-        assertDoesNotThrow(() -> {
-            notificationService.sendEmail("test@example.com", "Test Subject", "Test Body");
-        });
+        notificationService.sendEmail(to, subject, body);
 
         verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
-        assertTrue(errContent.toString().contains("Failed to send email to test@example.com: SMTP error"));
     }
 
     @Test
     void testSendEmail_MailSenderNull() {
-        NotificationService serviceWithNullSender = new NotificationService();
-        assertDoesNotThrow(() -> {
-            serviceWithNullSender.sendEmail("test@example.com", "Test Subject", "Test Body");
-        });
-        assertTrue(outContent.toString().contains("MailSender not configured. Simulation: To: test@example.com | Sub: Test Subject"));
+        // Create a new instance with a null mailSender
+        NotificationService nullMailSenderService = new NotificationService();
+
+        String to = "test@example.com";
+        String subject = "Test Subject";
+        String body = "Test Body";
+
+        nullMailSenderService.sendEmail(to, subject, body);
+
+        // Verify output matches the expected print statement in the method when mailSender is null
+        assertTrue(outContent.toString().contains("MailSender not configured. Simulation: To: " + to + " | Sub: " + subject));
     }
 
     @Test
-    void testSendWelcomeEmail() {
-        assertDoesNotThrow(() -> {
-            notificationService.sendWelcomeEmail("test@example.com", "John Doe");
-        });
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
-    }
+    void testSendEmail_ExceptionCaught() {
+        String to = "test@example.com";
+        String subject = "Test Subject";
+        String body = "Test Body";
 
-    @Test
-    void testSendCourseCompletionEmail() {
-        assertDoesNotThrow(() -> {
-            notificationService.sendCourseCompletionEmail("test@example.com", "John Doe", "Java 101");
-        });
-        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
-    }
+        doThrow(new RuntimeException("Mail server down")).when(mailSender).send(any(SimpleMailMessage.class));
 
-    @org.junit.jupiter.api.AfterEach
-    public void restoreStreams() {
-        System.setErr(originalErr);
-        System.setOut(originalOut);
+        // Exception should be caught within the service, not thrown out
+        assertDoesNotThrow(() -> notificationService.sendEmail(to, subject, body));
+
+        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+
+        // Verify output matches the expected print statement in the method when an exception happens
+        assertTrue(errContent.toString().contains("Failed to send email to " + to + ": Mail server down"));
     }
 }

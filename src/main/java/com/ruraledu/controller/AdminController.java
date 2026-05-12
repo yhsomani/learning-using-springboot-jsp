@@ -155,4 +155,15 @@ public class AdminController {
                 u.getId(), u.getFullName(), u.getEmail(), u.getRole(), u.getPoints(), u.isEnabled() ? "Active" : "Disabled"));
         }
     }
+
+    @GetMapping("/courses")
+    public String courses(Model model) {
+        model.addAttribute("courses", courseService.getAllCourses());
+        return "admin/courses";
+    }
+
+    @GetMapping("/certificates")
+    public String certificates(Model model) {
+        return "admin/certificates";
+    }
 }

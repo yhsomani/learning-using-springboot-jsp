@@ -43,14 +43,14 @@ FROM dual WHERE NOT EXISTS (SELECT 1 FROM courses WHERE title = 'Digital Literac
 
 -- Seed Lessons (for first course)
 INSERT INTO lessons (course_id, video_id, title, thumbnail, duration, order_index)
-SELECT c.id, '9_S6O9rV7U0', 'Introduction to Regenerative Soil', 'https://i.ytimg.com/vi/9_S6O9rV7U0/mqdefault.jpg', '12:45', 0
+SELECT c.id, 'dQw4w9WgXcQ', 'Introduction to Regenerative Soil', 'https://i.ytimg.com/vi/9_S6O9rV7U0/mqdefault.jpg', '12:45', 0
 FROM courses c WHERE c.title = 'Sustainable Organic Farming' AND c.deleted = false
-AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = '9_S6O9rV7U0');
+AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = 'dQw4w9WgXcQ');
 
 INSERT INTO lessons (course_id, video_id, title, thumbnail, duration, order_index)
-SELECT c.id, 'fS8fE8G6S8s', 'Understanding Micro-climates', 'https://i.ytimg.com/vi/fS8fE8G6S8s/mqdefault.jpg', '15:20', 1
+SELECT c.id, 'jNQXAC9IVRw', 'Understanding Micro-climates', 'https://i.ytimg.com/vi/fS8fE8G6S8s/mqdefault.jpg', '15:20', 1
 FROM courses c WHERE c.title = 'Sustainable Organic Farming' AND c.deleted = false
-AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = 'fS8fE8G6S8s');
+AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = 'jNQXAC9IVRw');
 
 -- Seed Quizzes
 INSERT INTO quizzes (title, course_id)
@@ -73,3 +73,14 @@ INSERT INTO questions (content, option_a, option_b, option_c, option_d, correct_
 SELECT 'What is composting?', 'Burning waste', 'Decomposing organic matter', 'Mixing chemicals', 'Plastic recycling', 'B', q.id
 FROM quizzes q JOIN courses c ON q.course_id = c.id WHERE c.title = 'Sustainable Organic Farming' AND c.deleted = false
 AND NOT EXISTS (SELECT 1 FROM questions qu WHERE qu.quiz_id = q.id AND qu.content = 'What is composting?');
+
+-- Seed Lessons (for second course)
+INSERT INTO lessons (course_id, video_id, title, thumbnail, duration, order_index)
+SELECT c.id, 'jNQXAC9IVRw', 'Introduction to Digital Tools', 'https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg', '05:00', 0
+FROM courses c WHERE c.title = 'Digital Literacy for Rural Entrepreneurs' AND c.deleted = false
+AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = 'jNQXAC9IVRw');
+
+INSERT INTO lessons (course_id, video_id, title, thumbnail, duration, order_index)
+SELECT c.id, 'tgbNymZ7vqY', 'Social Media Marketing', 'https://i.ytimg.com/vi/tgbNymZ7vqY/mqdefault.jpg', '08:30', 1
+FROM courses c WHERE c.title = 'Digital Literacy for Rural Entrepreneurs' AND c.deleted = false
+AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = 'tgbNymZ7vqY');
