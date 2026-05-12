@@ -193,7 +193,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="dropdown">
-                                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown">
+                                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-label="More actions for ${u.username}">
                                                             <i class="bi bi-three-dots"></i>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3">
