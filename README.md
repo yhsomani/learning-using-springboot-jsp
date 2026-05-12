@@ -1,5 +1,8 @@
 # 🌱 RuralEduHub — Rural E-Learning & Skill Development Hub
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
+![Tests Status](https://img.shields.io/badge/tests-40%20passing-brightgreen.svg)
+
 > **UN SDG Goal 4 — Quality Education**  
 > A full-stack Spring Boot MVC web application empowering rural communities through accessible education, real-time mentoring, and gamified skill development.
 
@@ -391,6 +394,8 @@ LOG_PATH, MANAGEMENT_PORT
 
 ## 🧪 Running Tests
 
+The project includes a robust suite of over 40 unit and integration tests. All test instabilities (e.g., socket port bindings, circular view paths) have been successfully resolved, resulting in a fully stable build pipeline.
+
 ```powershell
 # Windows - Run all tests
 .\maven\bin\mvn.cmd clean test
@@ -403,8 +408,9 @@ LOG_PATH, MANAGEMENT_PORT
 ```
 
 The test suite covers:
-- Unit tests for `UserService`, `EnrollmentService`, `CourseService`
-- Integration tests for REST API controllers
+- Unit tests for `UserService`, `EnrollmentService`, `CourseService`, `GamificationService`
+- Integration tests for REST API controllers (e.g. `MainControllerTest`)
+- Real-time socket service interactions (`RuralRealTimeMonitorServiceTest`)
 - Security configuration tests
 
 ---

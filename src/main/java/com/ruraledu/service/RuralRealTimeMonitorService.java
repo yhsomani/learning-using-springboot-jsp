@@ -23,15 +23,23 @@ public class RuralRealTimeMonitorService {
     private ServerSocket serverSocket;
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     private boolean running = false;
-    private static final int PORT = 9090;
+    @org.springframework.beans.factory.annotation.Value("${monitor.port:9090}")
+    private int port = 9090;
 
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public int getPort() {
+        return serverSocket != null && serverSocket.isBound() ? serverSocket.getLocalPort() : port;
+    }
     @PostConstruct
     public void startServer() {
         new Thread(() -> {
             try {
-                serverSocket = new ServerSocket(PORT);
+                serverSocket = new ServerSocket(port);
                 running = true;
-                logger.info("Rural Real-Time Monitor Socket Server started on port {}", PORT);
+                logger.info("Rural Real-Time Monitor Socket Server started on port {}", serverSocket.getLocalPort());
                 
                 while (running) {
                     Socket clientSocket = serverSocket.accept();

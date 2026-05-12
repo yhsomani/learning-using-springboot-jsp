@@ -22,6 +22,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = MainController.class)
 public class MainControllerTest {
 
+    @org.springframework.boot.test.context.TestConfiguration
+    static class CustomViewResolverConfig {
+        @org.springframework.context.annotation.Bean
+        public org.springframework.web.servlet.ViewResolver viewResolver() {
+            org.springframework.web.servlet.view.InternalResourceViewResolver viewResolver = new org.springframework.web.servlet.view.InternalResourceViewResolver();
+            viewResolver.setPrefix("/WEB-INF/jsp/");
+            viewResolver.setSuffix(".jsp");
+            return viewResolver;
+        }
+    }
     @Autowired
     private MockMvc mockMvc;
 

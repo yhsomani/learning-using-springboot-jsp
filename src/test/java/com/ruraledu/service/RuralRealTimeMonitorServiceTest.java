@@ -20,6 +20,7 @@ class RuralRealTimeMonitorServiceTest {
     @BeforeEach
     void setUp() {
         service = new RuralRealTimeMonitorService();
+        service.setPort(0); // Use ephemeral port for testing
     }
 
     @AfterEach
@@ -35,8 +36,8 @@ class RuralRealTimeMonitorServiceTest {
         // Give the server a moment to start
         Thread.sleep(500);
 
-        // Connect a client
-        try (Socket clientSocket = new Socket("localhost", 9090);
+        // Connect a client using the dynamically assigned port
+        try (Socket clientSocket = new Socket("localhost", service.getPort());
              PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
 
@@ -51,8 +52,9 @@ class RuralRealTimeMonitorServiceTest {
 
     @Test
     void testServerStartupFailure() throws IOException, InterruptedException {
-        // Bind the port beforehand to cause a BindException in startServer()
-        try (ServerSocket blocker = new ServerSocket(9090)) {
+        // Bind an ephemeral port beforehand to cause a BindException in startServer()
+        try (ServerSocket blocker = new ServerSocket(0)) {
+            service.setPort(blocker.getLocalPort());
             service.startServer();
             // Wait for the server thread to try to start and fail
             Thread.sleep(500);
