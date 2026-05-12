@@ -25,7 +25,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers(
                     "/h2-console/**",  // Only for dev, remove in production
-                    "/api/public/**"   // Public APIs are read-only, no state changes
+                    "/api/public/**",  // Public APIs are read-only, no state changes
+                    "/login",          // Form login POST
+                    "/logout",         // Logout POST
+                    "/register"        // Registration POST
                 )
             )
             .authorizeHttpRequests(auth -> auth

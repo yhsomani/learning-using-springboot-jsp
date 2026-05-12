@@ -107,12 +107,13 @@ FROM courses c
 WHERE c.title = 'Digital Literacy for Rural Entrepreneurs' AND c.deleted = false
 AND NOT EXISTS (SELECT 1 FROM lessons l WHERE l.course_id = c.id AND l.video_id = 'tgbNymZ7vqY');
 
--- Seed Badges
-INSERT INTO badges (name, description, icon_url, points_required)
+-- Seed Badges (no points_required in schema - matches Badge entity)
+INSERT INTO badges (name, description, icon_url)
 VALUES 
-    ('First Steps', 'Complete your first lesson', '/images/badges/first-steps.png', 10),
-    ('Quick Learner', 'Earn 100 points', '/images/badges/quick-learner.png', 100),
-    ('Knowledge Seeker', 'Earn 500 points', '/images/badges/knowledge-seeker.png', 500),
-    ('Course Champion', 'Complete your first course', '/images/badges/course-champion.png', 1000),
-    ('Farm Expert', 'Complete the Agriculture track', '/images/badges/farm-expert.png', 2000)
+    ('First Steps', 'Complete your first lesson', '/images/badges/first-steps.png'),
+    ('Quick Learner', 'Earn 100 points', '/images/badges/quick-learner.png'),
+    ('Knowledge Seeker', 'Earn 500 points', '/images/badges/knowledge-seeker.png'),
+    ('Course Champion', 'Complete your first course', '/images/badges/course-champion.png'),
+    ('Farm Expert', 'Complete the Agriculture track', '/images/badges/farm-expert.png')
 ON DUPLICATE KEY UPDATE name = VALUES(name);
+
