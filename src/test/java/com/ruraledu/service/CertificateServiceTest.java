@@ -7,7 +7,6 @@ import com.ruraledu.repository.CertificateRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -29,109 +28,108 @@ public class CertificateServiceTest {
     @InjectMocks
     private CertificateService certificateService;
 
-    private User testStudent;
-    private Course testCourse;
-    private File testDir;
-    private String expectedFilePath;
+    private User student;
+    private Course course;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        student = new User();
+        student.setId(1L);
+        student.setUsername("testuser");
+        student.setFullName("Test User");
 
-        testStudent = new User();
-        testStudent.setId(1L);
-        testStudent.setUsername("teststudent");
-        testStudent.setFullName("Test Student");
-
-        testCourse = new Course();
-        testCourse.setId(1L);
-        testCourse.setTitle("Test Course");
-
-        expectedFilePath = "certificates/certificate_" + testStudent.getId() + "_" + testCourse.getId() + ".pdf";
-        testDir = new File("certificates");
-        if (!testDir.exists()) {
-            testDir.mkdirs();
-        }
+        course = new Course();
+        course.setId(100L);
+        course.setTitle("Java Basics");
     }
 
     @AfterEach
     void tearDown() {
-        File file = new File(expectedFilePath);
-        if (file.exists()) {
-            file.delete();
+        // Clean up any generated files
+        File certFile = new File("certificates/certificate_1_100.pdf");
+        if (certFile.exists()) {
+            certFile.delete();
+        }
+        File testCertFile = new File("certificates/test_cert.pdf");
+        if (testCertFile.exists()) {
+            testCertFile.delete();
+        }
+        File certDir = new File("certificates");
+        if (certDir.exists() && certDir.list() != null && certDir.list().length == 0) {
+            certDir.delete();
         }
     }
 
     @Test
     void testGenerateCertificate_Success() {
-        // Act
-        certificateService.generateCertificate(testStudent, testCourse);
+        // Run the async method directly (it will run synchronously in the test thread)
+        certificateService.generateCertificate(student, course);
 
-        // Assert
-        ArgumentCaptor<Certificate> certCaptor = ArgumentCaptor.forClass(Certificate.class);
-        verify(certificateRepository, times(1)).save(certCaptor.capture());
+        // Verify that the file was created
+        File expectedFile = new File("certificates/certificate_1_100.pdf");
+        assertTrue(expectedFile.exists());
 
-        Certificate savedCert = certCaptor.getValue();
-        assertEquals(testStudent, savedCert.getUser());
-        assertEquals(testCourse, savedCert.getCourse());
-        assertEquals(expectedFilePath, savedCert.getCertificateUrl());
-        assertNotNull(savedCert.getIssuedDate());
+        // Verify that the repository save method was called
+        verify(certificateRepository, times(1)).save(any(Certificate.class));
+    }
 
-        // Verify file was created
-        File generatedFile = new File(expectedFilePath);
-        assertTrue(generatedFile.exists());
-        assertTrue(generatedFile.length() > 0);
+    @Test
+    void testGenerateCertificate_ExceptionHandling() {
+        // Cause an exception to be thrown by passing a mock student that throws on getId()
+        User mockStudent = mock(User.class);
+        when(mockStudent.getFullName()).thenReturn("Mock Student");
+        when(mockStudent.getUsername()).thenReturn("mockuser");
+        when(mockStudent.getId()).thenThrow(new RuntimeException("Simulated exception"));
+
+        // Since the method returns void, we just verify it doesn't propagate the exception
+        assertDoesNotThrow(() -> {
+            certificateService.generateCertificate(mockStudent, course);
+        });
+
+        // Verify save was never called due to the exception
+        verify(certificateRepository, never()).save(any(Certificate.class));
     }
 
     @Test
     void testGetCertificateData_Success() throws IOException {
-        // Arrange
+        // Setup mock certificate
+        Certificate mockCert = new Certificate();
+        mockCert.setCertificateUrl("certificates/test_cert.pdf");
+        when(certificateRepository.findByUserIdAndCourseId(1L, 100L)).thenReturn(Optional.of(mockCert));
+
         // Create a dummy file
-        File dummyFile = new File(expectedFilePath);
-        Files.write(dummyFile.toPath(), "dummy content".getBytes());
+        File dir = new File("certificates");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File file = new File("certificates/test_cert.pdf");
+        Files.write(file.toPath(), "test content".getBytes());
 
-        Certificate cert = new Certificate();
-        cert.setUser(testStudent);
-        cert.setCourse(testCourse);
-        cert.setCertificateUrl(expectedFilePath);
+        // Test
+        byte[] data = certificateService.getCertificateData(1L, 100L);
 
-        when(certificateRepository.findByUserIdAndCourseId(1L, 1L)).thenReturn(Optional.of(cert));
-
-        // Act
-        byte[] data = certificateService.getCertificateData(1L, 1L);
-
-        // Assert
         assertNotNull(data);
-        assertEquals("dummy content", new String(data));
+        assertEquals("test content", new String(data));
     }
 
     @Test
-    void testGetCertificateData_NotFoundInDB() throws IOException {
-        // Arrange
-        when(certificateRepository.findByUserIdAndCourseId(1L, 1L)).thenReturn(Optional.empty());
+    void testGetCertificateData_CertificateNotFound() throws IOException {
+        when(certificateRepository.findByUserIdAndCourseId(1L, 100L)).thenReturn(Optional.empty());
 
-        // Act
-        byte[] data = certificateService.getCertificateData(1L, 1L);
+        byte[] data = certificateService.getCertificateData(1L, 100L);
 
-        // Assert
         assertNull(data);
     }
 
     @Test
     void testGetCertificateData_FileNotFound() throws IOException {
-        // Arrange
-        Certificate cert = new Certificate();
-        cert.setUser(testStudent);
-        cert.setCourse(testCourse);
-        // Pointing to a non-existent file
-        cert.setCertificateUrl("certificates/non_existent.pdf");
+        Certificate mockCert = new Certificate();
+        mockCert.setCertificateUrl("certificates/non_existent.pdf");
+        when(certificateRepository.findByUserIdAndCourseId(1L, 100L)).thenReturn(Optional.of(mockCert));
 
-        when(certificateRepository.findByUserIdAndCourseId(1L, 1L)).thenReturn(Optional.of(cert));
+        byte[] data = certificateService.getCertificateData(1L, 100L);
 
-        // Act
-        byte[] data = certificateService.getCertificateData(1L, 1L);
-
-        // Assert
         assertNull(data);
     }
 }

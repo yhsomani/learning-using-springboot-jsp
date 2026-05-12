@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 @Service
 public class RuralRealTimeMonitorService {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RuralRealTimeMonitorService.class);
     private ServerSocket serverSocket;
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     private boolean running = false;
@@ -30,14 +31,16 @@ public class RuralRealTimeMonitorService {
             try {
                 serverSocket = new ServerSocket(PORT);
                 running = true;
-                System.out.println("Rural Real-Time Monitor Socket Server started on port " + PORT);
+                logger.info("Rural Real-Time Monitor Socket Server started on port {}", PORT);
                 
                 while (running) {
                     Socket clientSocket = serverSocket.accept();
                     executorService.submit(() -> handleClient(clientSocket));
                 }
             } catch (Exception e) {
-                if (running) e.printStackTrace();
+                if (running) {
+                    logger.error("Error in Rural Real-Time Monitor Socket Server: {}", e.getMessage(), e);
+                }
             }
         }).start();
     }
@@ -48,13 +51,17 @@ public class RuralRealTimeMonitorService {
             
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println("Received center heartbeat: " + inputLine);
+                logger.debug("Received center heartbeat: {}", inputLine);
                 out.println("ACK: Heartbeat received from " + inputLine);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error handling client connection: {}", e.getMessage(), e);
         } finally {
-            try { clientSocket.close(); } catch (Exception ignored) {}
+            try {
+                clientSocket.close();
+            } catch (Exception e) {
+                logger.error("Error closing client socket: {}", e.getMessage());
+            }
         }
     }
 
@@ -62,10 +69,12 @@ public class RuralRealTimeMonitorService {
     public void stopServer() {
         running = false;
         try {
-            if (serverSocket != null) serverSocket.close();
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
             executorService.shutdownNow();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error stopping Rural Real-Time Monitor Socket Server: {}", e.getMessage(), e);
         }
     }
 }
