@@ -35,7 +35,7 @@ public class GamificationServiceTest {
     private GamificationService gamificationService;
 
     @Captor
-    private ArgumentCaptor<LeaderboardEntry> leaderboardEntryCaptor;
+    private ArgumentCaptor<List<LeaderboardEntry>> leaderboardEntryCaptor;
 
     @Test
     void testAddPoints_UserExists() {
@@ -89,10 +89,10 @@ public class GamificationServiceTest {
         // Verify deleteAll was called
         verify(leaderboardRepository, times(1)).deleteAll();
 
-        // Verify save was called for each top student
-        verify(leaderboardRepository, times(3)).save(leaderboardEntryCaptor.capture());
+        // Verify saveAll was called with the list
+        verify(leaderboardRepository, times(1)).saveAll(leaderboardEntryCaptor.capture());
 
-        List<LeaderboardEntry> savedEntries = leaderboardEntryCaptor.getAllValues();
+        List<LeaderboardEntry> savedEntries = (List<LeaderboardEntry>) leaderboardEntryCaptor.getValue();
         assertEquals(3, savedEntries.size());
 
         assertEquals(user1, savedEntries.get(0).getUser());

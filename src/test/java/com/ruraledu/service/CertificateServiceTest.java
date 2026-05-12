@@ -114,12 +114,12 @@ public class CertificateServiceTest {
     }
 
     @Test
-    void testGetCertificateData_CertificateNotFound() throws IOException {
+    void testGetCertificateData_CertificateNotFound() {
         when(certificateRepository.findByUserIdAndCourseId(1L, 100L)).thenReturn(Optional.empty());
 
-        byte[] data = certificateService.getCertificateData(1L, 100L);
-
-        assertNull(data);
+        assertThrows(com.ruraledu.exception.CourseNotFoundException.class, () -> {
+            certificateService.getCertificateData(1L, 100L);
+        });
     }
 
     @Test
