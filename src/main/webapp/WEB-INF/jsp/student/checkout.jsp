@@ -34,6 +34,7 @@
             </div>
 
             <form action="/payments/process" method="POST">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <input type="hidden" name="courseId" value="${course.id}">
                 
                 <h5 class="text-muted small fw-bold mb-3">PAYMENT METHOD</h5>
