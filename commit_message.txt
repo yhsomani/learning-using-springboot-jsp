@@ -1,0 +1,5 @@
+🧪 Add tests for RuralRealTimeMonitorService socket exception handling
+
+🎯 What: Tested the previously untested exception handling when the socket server fails to start (e.g., due to port binding issues).
+📊 Coverage: Added tests for the happy path (server startup and client interaction) and the failure path (forcing a BindException by pre-binding the port).
+✨ Result: Increased test coverage and confidence in the resilience of the socket server's initialization block.
