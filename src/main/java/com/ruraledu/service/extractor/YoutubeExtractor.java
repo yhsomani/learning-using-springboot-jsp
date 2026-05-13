@@ -6,6 +6,7 @@ import com.ruraledu.dto.VideoMetadata;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -555,19 +556,19 @@ public class YoutubeExtractor {
     public static class ValidationResult {
         private final boolean valid;
         private final String message;
-        private final String extractedId;
+        private final String id;
         private final String type;
 
         public ValidationResult(boolean valid, String message, String extractedId, String type) {
             this.valid = valid;
             this.message = message;
-            this.extractedId = extractedId;
+            this.id = extractedId;
             this.type = type;
         }
 
         public boolean isValid() { return valid; }
         public String getMessage() { return message; }
-        public String getExtractedId() { return extractedId; }
+        public String getId() { return id; }
         public String getType() { return type; }
     }
 }

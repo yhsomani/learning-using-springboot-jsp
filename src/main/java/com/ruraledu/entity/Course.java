@@ -19,9 +19,13 @@ public class Course {
     private String difficulty; 
     private String thumbnail;
     private String youtubePlaylistUrl;
+    private String youtubePlaylistId;
+    
+    @Column(name = "teacher_id")
+    private Long teacherId;
     
     @ManyToOne
-    @JoinColumn(name = "teacher_id")
+    @JoinColumn(name = "teacher_id", insertable = false, updatable = false)
     private User teacher;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,6 +50,10 @@ public class Course {
     public void setThumbnail(String thumbnail) { this.thumbnail = thumbnail; }
     public String getYoutubePlaylistUrl() { return youtubePlaylistUrl; }
     public void setYoutubePlaylistUrl(String youtubePlaylistUrl) { this.youtubePlaylistUrl = youtubePlaylistUrl; }
+    public String getYoutubePlaylistId() { return youtubePlaylistId; }
+    public void setYoutubePlaylistId(String youtubePlaylistId) { this.youtubePlaylistId = youtubePlaylistId; }
+    public Long getTeacherId() { return teacherId; }
+    public void setTeacherId(Long teacherId) { this.teacherId = teacherId; }
     public User getTeacher() { return teacher; }
     public void setTeacher(User teacher) { this.teacher = teacher; }
     public List<Lesson> getLessons() { return lessons; }

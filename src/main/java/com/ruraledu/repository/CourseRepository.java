@@ -18,6 +18,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE c.youtubePlaylistUrl = :url AND c.deleted = false")
     Optional<Course> findByYoutubePlaylistUrl(@Param("url") String url);
     
+    @Query("SELECT c FROM Course c WHERE c.youtubePlaylistId = :playlistId AND c.deleted = false")
+    Optional<Course> findByYoutubePlaylistId(@Param("playlistId") String playlistId);
+    
     @Override
     @org.springframework.lang.NonNull
     Optional<Course> findById(@Param("id") @org.springframework.lang.NonNull Long id);
