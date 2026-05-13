@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .ignoringRequestMatchers(
                     "/h2-console/**",  // Only for dev, remove in production
                     "/api/public/**",  // Public APIs are read-only, no state changes
+                    "/api/admin/**",   // Allow admin API calls from dashboard
                     "/login",          // Form login POST
                     "/logout",         // Logout POST
                     "/register"        // Registration POST
@@ -79,6 +80,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())  // Prevent clickjacking
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;")
+                )
             );
         return http.build();
     }

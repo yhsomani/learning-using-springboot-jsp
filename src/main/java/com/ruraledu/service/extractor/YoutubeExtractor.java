@@ -398,7 +398,13 @@ public class YoutubeExtractor {
     // Helper methods
 
     private JsonNode findVideoListContents(JsonNode root) {
-        // Primary path - desktop layout
+        // Try to find the playlistVideoListRenderer anywhere in the tree
+        JsonNode renderer = findNodeByName(root, "playlistVideoListRenderer");
+        if (renderer != null && renderer.has("contents")) {
+            return renderer.get("contents");
+        }
+
+        // Fallback to older paths
         JsonNode contents = root.path("contents")
                 .path("twoColumnBrowseResultsRenderer")
                 .path("tabs").get(0)
@@ -415,23 +421,26 @@ public class YoutubeExtractor {
             return contents;
         }
 
-        // Alternative path - mobile/app layout
-        JsonNode altContents = root.path("onResponseReceivedActions")
-                .get(0)
-                .path("appendContinuationItemsAction")
-                .path("continuationItems");
+        return null;
+    }
 
-        if (!altContents.isMissingNode()) {
-            return altContents;
+    private JsonNode findNodeByName(JsonNode node, String name) {
+        if (node.has(name)) {
+            return node.get(name);
         }
-
-        // Another alternative path
-        JsonNode onResponseReceivedEndpoints = root.path("onResponseReceivedEndpoints")
-                .get(0)
-                .path("appendContinuationItemsAction")
-                .path("continuationItems");
-
-        return onResponseReceivedEndpoints.isMissingNode() ? null : onResponseReceivedEndpoints;
+        if (node.isObject()) {
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                JsonNode child = findNodeByName(fields.next().getValue(), name);
+                if (child != null) return child;
+            }
+        } else if (node.isArray()) {
+            for (JsonNode child : node) {
+                JsonNode result = findNodeByName(child, name);
+                if (result != null) return result;
+            }
+        }
+        return null;
     }
 
     private VideoMetadata parseVideoRenderer(JsonNode renderer, int index) {

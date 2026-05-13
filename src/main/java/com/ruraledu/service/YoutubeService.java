@@ -236,9 +236,8 @@ public class YoutubeService {
     /**
      * Fetches videos from a YouTube playlist using the extractor service.
      */
-    public List<VideoMetadata> fetchPlaylistVideos(String playlistUrl) {
-        String playlistId = extractPlaylistId(playlistUrl);
-        if (playlistId == null) {
+    public List<VideoMetadata> fetchPlaylistVideos(String playlistId) {
+        if (playlistId == null || playlistId.isEmpty()) {
             return new ArrayList<>();
         }
         return youtubeExtractor.extractPlaylistVideos(playlistId);
