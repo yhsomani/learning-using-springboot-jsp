@@ -22,6 +22,7 @@ public class YoutubeService {
     public List<Map<String, Object>> fetchPlaylistVideos(@org.springframework.lang.NonNull String playlistId, String customApiKey) {
         String finalKey = (customApiKey != null && !customApiKey.isEmpty()) ? customApiKey : configApiKey;
         
+        // If API key is not valid, immediately fall back to web scraping
         if (finalKey == null || finalKey.isEmpty() || finalKey.equals("YOUR_API_KEY_HERE")) {
             return fetchPlaylistVideosNoKey(playlistId);
         }
@@ -83,7 +84,12 @@ public class YoutubeService {
         List<Map<String, Object>> videos = new ArrayList<>();
         
         try {
-            String html = restTemplate.getForObject(url, String.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+            headers.set("Accept-Language", "en-US,en;q=0.9");
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+            org.springframework.http.ResponseEntity<String> response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+            String html = response.getBody();
             if (html == null) {
                 System.err.println("Failed to fetch HTML for playlist: " + playlistId);
                 return videos;
@@ -95,30 +101,27 @@ public class YoutubeService {
             
             if (matcher.find()) {
                 String jsonStr = matcher.group(1);
-                // System.out.println("JSON found: " + jsonStr.substring(0, 100) + "...");
                 try {
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode root = mapper.readTree(jsonStr);
                     
                     // Navigate through the complex JSON tree
-                    JsonNode videoListContents = findVideoList(root);
+                    List<JsonNode> videoRenderers = findVideoRenderers(root);
 
-                    if (videoListContents != null && videoListContents.isArray()) {
-                        for (int i = 0; i < videoListContents.size(); i++) {
-                            JsonNode videoRenderer = videoListContents.get(i).path("playlistVideoRenderer");
-                            if (!videoRenderer.isMissingNode()) {
-                                String videoId = videoRenderer.path("videoId").asText();
-                                String title = videoRenderer.path("title").path("runs").get(0).path("text").asText();
-                                String thumb = "https://i.ytimg.com/vi/" + videoId + "/mqdefault.jpg";
-                                
-                                if (videoId != null && !videoId.isEmpty() && !title.isEmpty() && !title.contains("Private video")) {
-                                    Map<String, Object> videoData = new HashMap<>();
-                                    videoData.put("videoId", videoId);
-                                    videoData.put("title", title.trim());
-                                    videoData.put("thumbnail", thumb);
-                                    videoData.put("orderIndex", i);
-                                    videos.add(videoData);
-                                }
+                    if (!videoRenderers.isEmpty()) {
+                        for (int i = 0; i < videoRenderers.size(); i++) {
+                            JsonNode videoRenderer = videoRenderers.get(i);
+                            String videoId = videoRenderer.path("videoId").asText();
+                            String title = videoRenderer.path("title").path("runs").get(0).path("text").asText();
+                            String thumb = "https://i.ytimg.com/vi/" + videoId + "/mqdefault.jpg";
+
+                            if (videoId != null && !videoId.isEmpty() && !title.isEmpty() && !title.contains("Private video")) {
+                                Map<String, Object> videoData = new HashMap<>();
+                                videoData.put("videoId", videoId);
+                                videoData.put("title", title.trim());
+                                videoData.put("thumbnail", thumb);
+                                videoData.put("orderIndex", i);
+                                videos.add(videoData);
                             }
                         }
                     }
@@ -128,6 +131,27 @@ public class YoutubeService {
             } else {
                 System.err.println("ytInitialData not found in HTML");
             }
+
+            // Second fallback mechanism: naive regex search for videoId and titles if the structure changed
+            if (videos.isEmpty()) {
+                 java.util.regex.Pattern videoPattern = java.util.regex.Pattern.compile("\"videoId\":\"([a-zA-Z0-9_-]{11})\",\"title\":\\{\"runs\":\\[\\{\"text\":\"([^\"]+)\"\\}\\]\\}");
+                 java.util.regex.Matcher videoMatcher = videoPattern.matcher(html);
+                 int index = 0;
+                 java.util.Set<String> seenIds = new java.util.HashSet<>();
+                 while(videoMatcher.find()) {
+                     String videoId = videoMatcher.group(1);
+                     String title = videoMatcher.group(2);
+                     if (seenIds.add(videoId) && !title.contains("Private video")) {
+                         Map<String, Object> videoData = new HashMap<>();
+                         videoData.put("videoId", videoId);
+                         videoData.put("title", title.trim());
+                         videoData.put("thumbnail", "https://i.ytimg.com/vi/" + videoId + "/mqdefault.jpg");
+                         videoData.put("orderIndex", index++);
+                         videos.add(videoData);
+                     }
+                 }
+            }
+
         } catch (Exception e) {
             System.err.println("Fallback scraper failed: " + e.getMessage());
         }
@@ -138,26 +162,18 @@ public class YoutubeService {
         return videos;
     }
 
-    private JsonNode findVideoList(JsonNode root) {
-        // Try multiple common paths as YouTube UI is dynamic
-        JsonNode contents = root.path("contents")
-            .path("twoColumnBrowseResultsRenderer")
-            .path("tabs").get(0)
-            .path("tabRenderer")
-            .path("content")
-            .path("sectionListRenderer")
-            .path("contents").get(0)
-            .path("itemSectionRenderer")
-            .path("contents").get(0)
-            .path("playlistVideoListRenderer")
-            .path("contents");
-        
-        if (!contents.isMissingNode()) return contents;
-        
-        // Alternative path
-        return root.path("sidebar")
-            .path("playlistSidebarRenderer")
-            .path("items"); // This might be wrong, but just an example of trying multiple paths
+    private List<JsonNode> findVideoRenderers(JsonNode node) {
+        List<JsonNode> result = new ArrayList<>();
+        if (node.isObject()) {
+            if (node.has("playlistVideoRenderer")) {
+                result.add(node.get("playlistVideoRenderer"));
+            } else {
+                node.elements().forEachRemaining(child -> result.addAll(findVideoRenderers(child)));
+            }
+        } else if (node.isArray()) {
+            node.elements().forEachRemaining(child -> result.addAll(findVideoRenderers(child)));
+        }
+        return result;
     }
 
     private String extractValue(String source, String key) {
