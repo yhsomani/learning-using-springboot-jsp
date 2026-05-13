@@ -25,7 +25,7 @@ public class PaymentController {
     private UserService userService;
 
     @GetMapping("/checkout/{courseId}")
-    public String checkout(@PathVariable Long courseId, Model model, Authentication authentication) {
+    public String checkout(@PathVariable @org.springframework.lang.NonNull Long courseId, Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         Course course = courseService.getCourseById(courseId);
         
@@ -35,7 +35,7 @@ public class PaymentController {
     }
 
     @PostMapping("/process")
-    public String process(@RequestParam Long courseId, Authentication authentication) {
+    public String process(@RequestParam @org.springframework.lang.NonNull Long courseId, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         Course course = courseService.getCourseById(courseId);
         

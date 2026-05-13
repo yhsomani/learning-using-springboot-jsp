@@ -98,7 +98,7 @@ public class AdminCourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCourse(@PathVariable Long id, @RequestBody Course courseDetails) {
+    public ResponseEntity<?> updateCourse(@PathVariable @org.springframework.lang.NonNull Long id, @RequestBody Course courseDetails) {
         Course course = courseService.getCourseById(id);
         if (course == null) return ResponseEntity.notFound().build();
         
@@ -112,7 +112,7 @@ public class AdminCourseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<?> deleteCourse(@PathVariable @org.springframework.lang.NonNull Long id) {
         Course course = courseService.getCourseById(id);
         if (course == null) return ResponseEntity.notFound().build();
         

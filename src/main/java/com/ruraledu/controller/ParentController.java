@@ -80,7 +80,7 @@ public class ParentController {
     }
 
     @PostMapping("/remove-child")
-    public String removeChild(@RequestParam Long childId, Authentication authentication, RedirectAttributes redirectAttributes) {
+    public String removeChild(@RequestParam @org.springframework.lang.NonNull Long childId, Authentication authentication, RedirectAttributes redirectAttributes) {
         User parent = userService.findByUsername(authentication.getName()).orElseThrow();
         User child = userRepository.findById(childId).orElse(null);
 

@@ -22,12 +22,14 @@ public class CourseService {
 
     @Transactional
     @CacheEvict(value = "courses", allEntries = true)
+    @org.springframework.lang.NonNull
     public Course saveCourse(Course course) {
         return courseRepository.save(course);
     }
 
     @Transactional
     @CacheEvict(value = "courses", allEntries = true)
+    @org.springframework.lang.NonNull
     public Course saveCourseWithLessons(Course course, List<Lesson> lessons) {
         if (lessons == null || lessons.isEmpty()) {
             throw new IllegalArgumentException("Course must have at least one lesson.");

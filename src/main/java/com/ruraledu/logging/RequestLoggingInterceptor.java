@@ -19,7 +19,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     private static final String START_TIME_ATTRIBUTE = "startTime";
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(@org.springframework.lang.NonNull HttpServletRequest request, @org.springframework.lang.NonNull HttpServletResponse response, @org.springframework.lang.NonNull Object handler) {
         String correlationId = request.getHeader(CORRELATION_ID_HEADER);
         if (correlationId == null || correlationId.isEmpty()) {
             correlationId = UUID.randomUUID().toString();
@@ -39,8 +39,8 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, 
-                                Object handler, Exception ex) {
+    public void afterCompletion(@org.springframework.lang.NonNull HttpServletRequest request, @org.springframework.lang.NonNull HttpServletResponse response, 
+                                @org.springframework.lang.NonNull Object handler, @org.springframework.lang.Nullable Exception ex) {
         Long startTime = (Long) request.getAttribute(START_TIME_ATTRIBUTE);
         String correlationId = (String) request.getAttribute("correlationId");
         long duration = System.currentTimeMillis() - (startTime != null ? startTime : System.currentTimeMillis());

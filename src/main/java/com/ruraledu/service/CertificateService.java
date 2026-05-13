@@ -20,7 +20,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
-import com.ruraledu.exception.CourseNotFoundException;
 
 @Service
 public class CertificateService {

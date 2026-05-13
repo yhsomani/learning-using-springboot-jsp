@@ -30,8 +30,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.id DESC")
     List<User> findTop10ByOrderByIdDesc();
     
-    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.deleted = false")
-    Page<User> findAll(Pageable pageable);
+    @Override
+    @org.springframework.lang.NonNull
+    Page<User> findAll(@org.springframework.lang.NonNull Pageable pageable);
 
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.deleted = false")
     List<User> findAllActive();

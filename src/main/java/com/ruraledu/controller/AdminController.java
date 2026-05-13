@@ -24,8 +24,6 @@ import java.time.format.DateTimeFormatter;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private CourseService courseService;
@@ -81,7 +79,7 @@ public class AdminController {
 
     @GetMapping("/users/{id}")
     @ResponseBody
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
+    public ResponseEntity<User> getUser(@PathVariable @org.springframework.lang.NonNull Long id) {
         return userRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -89,7 +87,7 @@ public class AdminController {
 
     @PostMapping("/users/{id}/toggle-status")
     @ResponseBody
-    public ResponseEntity<?> toggleUserStatus(@PathVariable Long id, org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<?> toggleUserStatus(@PathVariable @org.springframework.lang.NonNull Long id, org.springframework.security.core.Authentication authentication) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setEnabled(!user.isEnabled());
@@ -102,7 +100,7 @@ public class AdminController {
 
     @PostMapping("/users/{id}/update")
     @ResponseBody
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, String> updates, org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<?> updateUser(@PathVariable @org.springframework.lang.NonNull Long id, @RequestBody Map<String, String> updates, org.springframework.security.core.Authentication authentication) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setFullName(updates.get("fullName"));
@@ -117,7 +115,7 @@ public class AdminController {
 
     @DeleteMapping("/users/{id}")
     @ResponseBody
-    public ResponseEntity<?> deleteUser(@PathVariable Long id, org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<?> deleteUser(@PathVariable @org.springframework.lang.NonNull Long id, org.springframework.security.core.Authentication authentication) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setDeleted(true);

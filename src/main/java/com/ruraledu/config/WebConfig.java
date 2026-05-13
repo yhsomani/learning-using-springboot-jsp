@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(@org.springframework.lang.NonNull InterceptorRegistry registry) {
         registry.addInterceptor(requestLoggingInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/css/**", "/js/**", "/images/**");

@@ -58,7 +58,7 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public void updateLessonProgress(Long studentId, Long lessonId, boolean completed) {
+    public void updateLessonProgress(@org.springframework.lang.NonNull Long studentId, @org.springframework.lang.NonNull Long lessonId, boolean completed) {
         com.ruraledu.entity.Lesson lesson = lessonRepository.findById(lessonId).orElseThrow();
         Long courseId = lesson.getCourse().getId();
         

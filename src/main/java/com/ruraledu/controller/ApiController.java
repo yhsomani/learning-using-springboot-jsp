@@ -47,8 +47,6 @@ public class ApiController {
     @Autowired
     private CertificateRepository certificateRepository;
 
-    @Autowired
-    private UserRepository userRepository;
 
     @GetMapping("/courses")
     public List<Course> getAllCourses() {
@@ -78,8 +76,7 @@ public class ApiController {
         return ResponseEntity.ok(data);
     }
 
-    @PostMapping("/lessons/{lessonId}/progress")
-    public ResponseEntity<?> updateProgress(@PathVariable Long lessonId, @RequestBody Map<String, Boolean> request, Authentication authentication) {
+    public ResponseEntity<?> updateProgress(@PathVariable @org.springframework.lang.NonNull Long lessonId, @RequestBody Map<String, Boolean> request, Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
@@ -101,7 +98,7 @@ public class ApiController {
     }
 
     @PostMapping("/lessons/{lessonId}/complete")
-    public ResponseEntity<?> completeLesson(@PathVariable Long lessonId, Authentication authentication) {
+    public ResponseEntity<?> completeLesson(@PathVariable @org.springframework.lang.NonNull Long lessonId, Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
@@ -110,8 +107,7 @@ public class ApiController {
         return ResponseEntity.ok(Map.of("message", "Well done! The lesson has been marked as complete and points have been awarded.", "pointsEarned", 10));
     }
 
-    @PostMapping("/courses/{courseId}/quiz/submit")
-    public ResponseEntity<?> submitQuiz(@PathVariable Long courseId, 
+    public ResponseEntity<?> submitQuiz(@PathVariable @org.springframework.lang.NonNull Long courseId, 
                                         @Valid @RequestBody QuizSubmissionRequest request, 
                                         Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
@@ -211,7 +207,7 @@ public class ApiController {
     }
 
     @GetMapping("/certificates/{courseId}/download")
-    public ResponseEntity<?> downloadCertificate(@PathVariable Long courseId, Authentication authentication) {
+    public ResponseEntity<?> downloadCertificate(@PathVariable @org.springframework.lang.NonNull Long courseId, Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         

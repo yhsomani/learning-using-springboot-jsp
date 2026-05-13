@@ -18,9 +18,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE c.youtubePlaylistUrl = :url AND c.deleted = false")
     Optional<Course> findByYoutubePlaylistUrl(@Param("url") String url);
     
-    @EntityGraph(attributePaths = {"teacher"})
-    @Query("SELECT c FROM Course c WHERE c.id = :id AND c.deleted = false")
-    Optional<Course> findById(@Param("id") Long id);
+    @Override
+    @org.springframework.lang.NonNull
+    Optional<Course> findById(@Param("id") @org.springframework.lang.NonNull Long id);
     
     // Recommendations: courses in same category that student hasn't enrolled in
     @Query("SELECT c FROM Course c WHERE c.category = :category AND c.deleted = false AND c.id NOT IN (SELECT e.course.id FROM Enrollment e WHERE e.student.id = :studentId)")
@@ -34,8 +34,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE c.teacher.id = :teacherId AND c.deleted = false")
     List<Course> findByTeacherId(@Param("teacherId") Long teacherId);
 
-    @EntityGraph(attributePaths = {"teacher"})
-    @Query("SELECT c FROM Course c WHERE c.deleted = false")
+    @Override
+    @org.springframework.lang.NonNull
     List<Course> findAll();
 
     // New arrivals - properly limited via Pageable

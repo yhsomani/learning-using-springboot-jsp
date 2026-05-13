@@ -29,7 +29,7 @@ public class CourseImportTest {
     @SuppressWarnings("null")
     public void testScraperResilience() {
         String id = youtubeService.extractPlaylistId(TEST_PLAYLIST_URL);
-        List<Map<String, Object>> videos = youtubeService.fetchPlaylistVideos(id, null);
+        List<Map<String, Object>> videos = youtubeService.fetchPlaylistVideos(id);
         
         // This test requires internet access. If environment blocks it, we check for non-null at least.
         assertNotNull(videos);
