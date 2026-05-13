@@ -300,7 +300,7 @@ public class ApiController {
                 "message", e.getMessage()
             ));
         } catch (IllegalStateException e) {
-            return ResponseEntity.conflict().body(Map.of(
+            return ResponseEntity.status(409).body(Map.of(
                 "error", "CONFLICT_ERROR",
                 "message", e.getMessage()
             ));
@@ -330,7 +330,7 @@ public class ApiController {
                 "message", e.getMessage()
             ));
         } catch (IllegalStateException e) {
-            return ResponseEntity.conflict().body(Map.of(
+            return ResponseEntity.status(409).body(Map.of(
                 "error", "SYNC_ERROR",
                 "message", e.getMessage()
             ));
