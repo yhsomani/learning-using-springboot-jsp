@@ -225,4 +225,157 @@ public class ApiController {
             return ResponseEntity.status(500).body("An error occurred while retrieving the certificate document. Please contact support if the problem persists.");
         }
     }
+
+    @Autowired
+    private com.ruraledu.service.YoutubeService youtubeService;
+
+    @PostMapping("/youtube/validate")
+    public ResponseEntity<?> validateYoutubeUrl(@RequestBody Map<String, String> request) {
+        String url = request.get("url");
+        if (url == null || url.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "valid", false,
+                "message", "URL is required",
+                "error_code", "URL_EMPTY"
+            ));
+        }
+
+        try {
+            Map<String, Object> result = youtubeService.validateYoutubeUrl(url);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                "valid", false,
+                "message", e.getMessage(),
+                "error_code", "VALIDATION_ERROR"
+            ));
+        }
+    }
+
+    @PostMapping("/youtube/import-playlist")
+    public ResponseEntity<?> importPlaylist(@RequestBody Map<String, Object> request, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of(
+                "error", "Authentication required",
+                "message", "Please log in to create courses"
+            ));
+        }
+
+        try {
+            User user = userService.findByUsername(authentication.getName()).orElseThrow();
+            
+            String title = (String) request.get("title");
+            String description = (String) request.get("description");
+            String playlistUrl = (String) request.get("playlistUrl");
+            String category = (String) request.get("category");
+            String difficulty = (String) request.get("difficulty");
+
+            if (title == null || title.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "TITLE_REQUIRED",
+                    "message", "Course title is required"
+                ));
+            }
+            if (playlistUrl == null || playlistUrl.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "PLAYLIST_URL_REQUIRED",
+                    "message", "YouTube playlist URL is required"
+                ));
+            }
+
+            Map<String, Object> result = youtubeService.importPlaylistAsCourse(
+                title.trim(),
+                description != null ? description.trim() : "",
+                playlistUrl.trim(),
+                category != null ? category : "General",
+                difficulty != null ? difficulty : "Beginner",
+                user.getId()
+            );
+
+            return ResponseEntity.ok(result);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "VALIDATION_ERROR",
+                "message", e.getMessage()
+            ));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.conflict().body(Map.of(
+                "error", "CONFLICT_ERROR",
+                "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "IMPORT_ERROR",
+                "message", "An unexpected error occurred while importing the playlist. Please try again."
+            ));
+        }
+    }
+
+    @PostMapping("/youtube/sync-course/{courseId}")
+    public ResponseEntity<?> syncCourseWithPlaylist(@PathVariable Long courseId, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of(
+                "error", "Authentication required",
+                "message", "Please log in to sync courses"
+            ));
+        }
+
+        try {
+            Map<String, Object> result = youtubeService.syncCourseWithPlaylist(courseId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "VALIDATION_ERROR",
+                "message", e.getMessage()
+            ));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.conflict().body(Map.of(
+                "error", "SYNC_ERROR",
+                "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "SYNC_FAILED",
+                "message", "Failed to sync course with playlist. Please try again."
+            ));
+        }
+    }
+
+    @GetMapping("/youtube/preview")
+    public ResponseEntity<?> previewPlaylist(@RequestParam String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "URL_REQUIRED",
+                "message", "Playlist URL is required"
+            ));
+        }
+
+        try {
+            List<com.ruraledu.dto.VideoMetadata> videos = youtubeService.fetchPlaylistVideos(url.trim());
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "videoCount", videos.size(),
+                "videos", videos
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", "INVALID_URL",
+                "message", e.getMessage()
+            ));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(404).body(Map.of(
+                "success", false,
+                "error", "PLAYLIST_UNAVAILABLE",
+                "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", "EXTRACTION_FAILED",
+                "message", "Failed to extract playlist videos. Please check the URL and try again."
+            ));
+        }
+    }
 }
