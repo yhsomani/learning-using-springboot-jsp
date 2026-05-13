@@ -15,7 +15,16 @@
             <i class="bi bi-shield-lock-fill display-4"></i>
         </div>
         <h1 class="fw-bold mb-3">Access Restricted</h1>
-        <p class="text-muted mb-4">You do not have the necessary permissions to access this administrative portal. This incident has been logged.</p>
+        <p class="text-muted mb-4">
+            <c:choose>
+                <c:when test="${not empty message}">
+                    ${message}
+                </c:when>
+                <c:otherwise>
+                    You do not have the necessary permissions to access this portal. This incident has been logged.
+                </c:otherwise>
+            </c:choose>
+        </p>
         <div class="d-grid gap-2">
             <a href="/main/dashboard" class="btn btn-primary rounded-pill py-3 fw-bold">Return to Dashboard</a>
             <a href="/logout" class="btn btn-outline-secondary rounded-pill py-3">Logout & Switch Account</a>

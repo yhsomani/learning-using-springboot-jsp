@@ -30,7 +30,7 @@ public class CourseService {
     @CacheEvict(value = "courses", allEntries = true)
     public Course saveCourseWithLessons(Course course, List<Lesson> lessons) {
         if (lessons == null || lessons.isEmpty()) {
-            throw new IllegalArgumentException("Course must have at least one lesson.");
+            throw new IllegalArgumentException("A course cannot be empty. It must contain at least one lesson before it can be saved.");
         }
 
         Course savedCourse = courseRepository.save(course);

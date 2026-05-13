@@ -67,7 +67,7 @@ public class PaymentServiceTest {
             paymentService.processPayment(user, course, 0.0);
         });
 
-        assertEquals("Payment amount must be greater than zero", exception.getMessage());
+        assertEquals("The payment amount provided must be greater than zero. Please check your entered amount and try again.", exception.getMessage());
         verify(paymentRepository, never()).save(any(Payment.class));
         verify(enrollmentService, never()).enroll(any(), any());
     }
@@ -81,7 +81,7 @@ public class PaymentServiceTest {
             paymentService.processPayment(user, course, -10.0);
         });
 
-        assertEquals("Payment amount must be greater than zero", exception.getMessage());
+        assertEquals("The payment amount provided must be greater than zero. Please check your entered amount and try again.", exception.getMessage());
         verify(paymentRepository, never()).save(any(Payment.class));
         verify(enrollmentService, never()).enroll(any(), any());
     }
@@ -95,7 +95,7 @@ public class PaymentServiceTest {
             paymentService.processPayment(user, course, null);
         });
 
-        assertEquals("Payment amount must be greater than zero", exception.getMessage());
+        assertEquals("The payment amount provided must be greater than zero. Please check your entered amount and try again.", exception.getMessage());
         verify(paymentRepository, never()).save(any(Payment.class));
         verify(enrollmentService, never()).enroll(any(), any());
     }

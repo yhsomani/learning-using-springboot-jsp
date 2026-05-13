@@ -139,7 +139,7 @@ public class AdminController {
             auditService.log("BULK_DELETE", authentication.getName(), "User", null, "Archived " + ids.size() + " users");
             return ResponseEntity.ok(Map.of("message", "Users archived successfully"));
         }
-        return ResponseEntity.badRequest().body(Map.of("message", "No IDs provided"));
+        return ResponseEntity.badRequest().body(Map.of("message", "No user IDs were specified for the operation. Please select at least one user and try again."));
     }
 
     @GetMapping("/users/export")

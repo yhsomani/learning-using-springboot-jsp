@@ -15,7 +15,16 @@
             <i class="bi bi-geo-alt-fill display-4"></i>
         </div>
         <h1 class="fw-bold mb-3">404 - Lost in the Field?</h1>
-        <p class="text-muted mb-4">The page you're looking for doesn't exist or has been moved to a new location.</p>
+        <p class="text-muted mb-4">
+            <c:choose>
+                <c:when test="${not empty message}">
+                    ${message}
+                </c:when>
+                <c:otherwise>
+                    The page you're looking for doesn't exist or has been moved to a new location.
+                </c:otherwise>
+            </c:choose>
+        </p>
         <div class="d-grid gap-2">
             <a href="/" class="btn btn-primary rounded-pill py-3 fw-bold">Go to Homepage</a>
             <button onclick="window.history.back()" class="btn btn-outline-secondary rounded-pill py-3">Take Me Back</button>

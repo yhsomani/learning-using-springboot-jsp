@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.Map;
+import java.util.Collections;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,44 +19,61 @@ public class GlobalExceptionHandler {
     public Object handleCourseNotFound(CourseNotFoundException ex, HttpServletRequest request) {
         logger.warn("Course not found: {}", ex.getMessage());
         if (isApiRequest(request)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage() != null ? ex.getMessage() : "The requested course could not be found."));
         }
         ModelAndView mav = new ModelAndView("error/404");
-        mav.addObject("message", ex.getMessage());
+        mav.addObject("message", ex.getMessage() != null ? ex.getMessage() : "The requested course could not be found.");
+        return mav;
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public Object handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
+        logger.warn("Invalid argument: {}", ex.getMessage());
+        String msg = ex.getMessage() != null ? ex.getMessage() : "Invalid input provided. Please review your information and try again.";
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", msg));
+        }
+        ModelAndView mav = new ModelAndView("error/404");
+        mav.addObject("message", msg);
         return mav;
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public Object handleUserAlreadyExists(UserAlreadyExistsException ex, HttpServletRequest request) {
-        String message = ex.getMessage() != null ? ex.getMessage() : "User already exists";
+        String message = ex.getMessage() != null ? ex.getMessage() : "The provided username or email is already associated with an existing account.";
         logger.warn("Registration conflict: {}", message);
         if (isApiRequest(request)) {
             return ResponseEntity.badRequest().body(Map.of("message", message));
         }
         ModelAndView mav = new ModelAndView("register");
-        mav.addObject("errorMessage", message);
+        // Update to match how the JSP renders errors
+        mav.addObject("errors", Collections.singletonList(message));
         return mav;
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public Object handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         logger.warn("Access denied for {} on {}: {}", request.getRemoteUser(), request.getRequestURI(), ex.getMessage());
+        String msg = "You do not have the required permissions to view this page or perform this action.";
         if (isApiRequest(request)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access Denied"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", msg));
         }
-        return new ModelAndView("error/403");
+        ModelAndView mav = new ModelAndView("error/403");
+        mav.addObject("message", msg);
+        return mav;
     }
 
     @ExceptionHandler(Exception.class)
     public Object handleAllExceptions(Exception ex, HttpServletRequest request) {
         logger.error("Unhandled exception on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        String msg = ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred while processing your request. Please try again later or contact support if the issue persists.";
         if (isApiRequest(request)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "An unexpected error occurred. Please try again later."));
+                    .body(Map.of("message", msg));
         }
         // Use 404 page as fallback since no 500.jsp exists
         ModelAndView mav = new ModelAndView("error/404");
-        mav.addObject("message", "An unexpected error occurred. Please try again later.");
+        mav.addObject("message", msg);
         return mav;
     }
 
