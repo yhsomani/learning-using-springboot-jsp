@@ -3,12 +3,11 @@ package com.ruraledu.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+
 
 /**
  * DTO for adding gamification points with validation.
  */
-@Data
 public class PointsRequest {
     
     @NotNull(message = "Points are required")
@@ -21,4 +20,28 @@ public class PointsRequest {
     
     @NotNull(message = "Entity ID is required")
     private Long entityId;
+
+    public Integer getPoints() {
+        return points;
+    }
+
+    public void setPoints(Integer points) {
+        this.points = points;
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public Long getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
+    }
 }

@@ -455,6 +455,22 @@ docker run -p 8081:8081 \
 
 ---
 
+## 🔧 Common Troubleshooting
+
+1. **Could not find goal 'runcls'**:
+   - If you see `[ERROR] Could not find goal 'runcls'`, it's a typo in the Maven command.
+   - Use `.\maven\bin\mvn.cmd spring-boot:run` instead of `runcls`.
+
+2. **Lombok Compilation Errors**:
+   - The project previously used Lombok, which causes compilation issues (`NoSuchFieldException: com.sun.tools.javac.code.TypeTag`) on newer JDKs (like Java 21+ or Java 26).
+   - **Resolution applied**: Lombok was completely removed from the project and replaced with standard Java getters and setters.
+
+3. **ByteBuddy Test Errors**:
+   - On Java 26, `mvn test` might fail with `java.lang.IllegalArgumentException: Java 26 (70) is not supported by the current version of Byte Buddy`.
+   - Workaround: Use Java 17 for tests, or add `-DskipTests` when building.
+
+---
+
 ## 🚢 Production Deployment Notes
 
 1. **Disable DDL auto**: Keep `spring.jpa.hibernate.ddl-auto=validate` (already set)

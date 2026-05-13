@@ -1,12 +1,11 @@
 package com.ruraledu.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "quiz_attempts")
-@Data
 public class QuizAttempt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +21,19 @@ public class QuizAttempt {
 
     private int score;
     private LocalDateTime attemptDate;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public User getStudent() { return student; }
+    public void setStudent(User student) { this.student = student; }
+
+    public Quiz getQuiz() { return quiz; }
+    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
+
+    public int getScore() { return score; }
+    public void setScore(int score) { this.score = score; }
+
+    public LocalDateTime getAttemptDate() { return attemptDate; }
+    public void setAttemptDate(LocalDateTime attemptDate) { this.attemptDate = attemptDate; }
 }
