@@ -27,21 +27,15 @@ public class YoutubeServiceTest {
     @BeforeEach
     public void setUp() {
         youtubeService = new YoutubeService();
-        ReflectionTestUtils.setField(youtubeService, "configApiKey", "TEST_API_KEY");
         RestTemplate restTemplate = (RestTemplate) ReflectionTestUtils.getField(youtubeService, "restTemplate");
         mockServer = MockRestServiceServer.createServer(restTemplate);
     }
 
     @Test
-    public void testFetchPlaylistVideosApiErrorTriggersFallback() {
+    public void testFetchPlaylistVideosScraperSuccess() {
         String playlistId = "TEST_PLAYLIST_ID";
 
-        // Mock the Google API call to return a 500 Internal Server Error
-        mockServer.expect(requestTo(startsWith("https://www.googleapis.com/youtube/v3/playlistItems")))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-
-        // Mock the fallback YouTube playlist page call to return dummy HTML
+        // Mock the YouTube playlist page call to return dummy HTML
         String mockHtml = "<html><body><script>var ytInitialData = {\"contents\":{\"twoColumnBrowseResultsRenderer\":{\"tabs\":[{\"tabRenderer\":{\"content\":{\"sectionListRenderer\":{\"contents\":[{\"itemSectionRenderer\":{\"contents\":[{\"playlistVideoListRenderer\":{\"contents\":[{\"playlistVideoRenderer\":{\"videoId\":\"vid1\",\"title\":{\"runs\":[{\"text\":\"Test Video 1\"}]}}}]}}]}}]}}}}]}}};</script></body></html>";
 
         mockServer.expect(requestTo(startsWith("https://www.youtube.com/playlist?list=" + playlistId)))
@@ -49,15 +43,26 @@ public class YoutubeServiceTest {
                 .andRespond(withSuccess(mockHtml, MediaType.TEXT_HTML));
 
         // Execute
-        List<Map<String, Object>> result = youtubeService.fetchPlaylistVideos(playlistId, null);
+        List<Map<String, Object>> result = youtubeService.fetchPlaylistVideos(playlistId);
 
         // Verify that the mock server was called as expected
         mockServer.verify();
 
-        // Check the results (from the fallback)
+        // Check the results
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("vid1", result.get(0).get("videoId"));
         assertEquals("Test Video 1", result.get(0).get("title"));
+    }
+
+    @Test
+    public void testExtractPlaylistId() {
+        String url = "https://www.youtube.com/playlist?list=PLTjRvDozrdlx82aIrsHY_Ndr3mKGK4tgq";
+        String id = youtubeService.extractPlaylistId(url);
+        assertEquals("PLTjRvDozrdlx82aIrsHY_Ndr3mKGK4tgq", id);
+
+        String urlWithParams = "https://www.youtube.com/playlist?list=PLTjRvDozrdlx82aIrsHY_Ndr3mKGK4tgq&si=T8ZR-lClNPZP0LbZ";
+        String idWithParams = youtubeService.extractPlaylistId(urlWithParams);
+        assertEquals("PLTjRvDozrdlx82aIrsHY_Ndr3mKGK4tgq", idWithParams);
     }
 }

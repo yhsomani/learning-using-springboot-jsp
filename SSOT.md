@@ -96,7 +96,6 @@ Environment variables handle credential injection:
 | `DB_PASSWORD`       | MySQL Password                         | `root` |
 | `REDIS_HOST`        | Redis server host                      | `localhost` |
 | `REDIS_PORT`        | Redis server port                      | `6379` |
-| `YOUTUBE_API_KEY`   | API Key for CourseImportService        | `YOUR_API_KEY_HERE` |
 
 ### Initialization
 - Schema management is handled via **Flyway** (`V1__init_schema.sql`).

@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public Object handleUserAlreadyExists(UserAlreadyExistsException ex, HttpServletRequest request) {
-        String message = ex.getMessage() != null ? ex.getMessage() : "User already exists";
+        String message = ex.getMessage() != null ? ex.getMessage() : "The provided user information already exists in our system.";
         logger.warn("Registration conflict: {}", message);
         if (isApiRequest(request)) {
             return ResponseEntity.badRequest().body(Map.of("message", message));
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     public Object handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         logger.warn("Access denied for {} on {}: {}", request.getRemoteUser(), request.getRequestURI(), ex.getMessage());
         if (isApiRequest(request)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access Denied"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access Denied: You do not have the required permissions to access this resource."));
         }
         return new ModelAndView("error/403");
     }
@@ -51,11 +51,11 @@ public class GlobalExceptionHandler {
         logger.error("Unhandled exception on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
         if (isApiRequest(request)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "An unexpected error occurred. Please try again later."));
+                    .body(Map.of("message", "A system error occurred while processing your request. Our technical team has been notified. Please try again later."));
         }
         // Use 404 page as fallback since no 500.jsp exists
         ModelAndView mav = new ModelAndView("error/404");
-        mav.addObject("message", "An unexpected error occurred. Please try again later.");
+        mav.addObject("message", "A system error occurred while processing your request. Our technical team has been notified. Please try again later.");
         return mav;
     }
 

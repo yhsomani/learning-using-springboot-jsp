@@ -23,15 +23,15 @@ public class UserService {
 
     public User registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new com.ruraledu.exception.UserAlreadyExistsException("Username already taken: " + user.getUsername());
+            throw new com.ruraledu.exception.UserAlreadyExistsException(String.format("The username '%s' is already in use. Please select a different username.", user.getUsername()));
         }
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new com.ruraledu.exception.UserAlreadyExistsException("Email already registered: " + user.getEmail());
+            throw new com.ruraledu.exception.UserAlreadyExistsException(String.format("The email address '%s' is already associated with an account.", user.getEmail()));
         }
         
         // Prevent elevation of privilege
         if (user.getRole() == User.Role.ADMIN) {
-            throw new RuntimeException("Cannot register as Admin. Please contact system administrator.");
+            throw new RuntimeException("Security Restriction: Administrative accounts cannot be created via public registration. Please contact the system administrator for assistance.");
         }
         
         user.setPassword(passwordEncoder.encode(user.getPassword()));

@@ -42,20 +42,19 @@ public class AdminCourseController {
         String description = request.get("description");
         String category = request.get("category");
         String difficulty = request.get("difficulty");
-        String customApiKey = request.get("apiKey");
 
         if (playlistUrl == null || playlistUrl.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Playlist URL is required"));
+            return ResponseEntity.badRequest().body(Map.of("message", "YouTube Playlist URL is required to proceed with the import."));
         }
 
         String playlistId = youtubeService.extractPlaylistId(playlistUrl);
         if (playlistId == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid YouTube Playlist URL"));
+            return ResponseEntity.badRequest().body(Map.of("message", "The provided YouTube Playlist URL is invalid. Please check the format and try again."));
         }
 
         // Idempotency check
         if (courseRepository.findByYoutubePlaylistUrl(playlistUrl).isPresent()) {
-            return ResponseEntity.status(409).body(Map.of("message", "Course already exists for this playlist"));
+            return ResponseEntity.status(409).body(Map.of("message", "A course with this YouTube playlist has already been imported."));
         }
 
         User admin = userService.findByUsername(authentication.getName()).orElseThrow();
@@ -68,9 +67,9 @@ public class AdminCourseController {
         course.setYoutubePlaylistUrl(playlistUrl);
         course.setTeacher(admin);
 
-        List<Map<String, Object>> videoItems = youtubeService.fetchPlaylistVideos(playlistId, customApiKey);
+        List<Map<String, Object>> videoItems = youtubeService.fetchPlaylistVideos(playlistId);
         if (videoItems.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Could not fetch videos from playlist. Check your API key and playlist visibility."));
+            return ResponseEntity.badRequest().body(Map.of("message", "Unable to retrieve videos from the playlist. Please verify that the playlist is public and contains valid videos."));
         }
 
         // Use first video thumbnail as course thumbnail
@@ -87,12 +86,12 @@ public class AdminCourseController {
         }).collect(Collectors.toList());
 
         if (lessons.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Course must have at least one valid video to be imported."));
+            return ResponseEntity.badRequest().body(Map.of("message", "Import failed: The playlist must contain at least one public video."));
         }
         final Course savedCourse = courseService.saveCourseWithLessons(course, lessons);
 
         return ResponseEntity.ok(Map.of(
-            "message", "Course imported successfully",
+            "message", "The course and its associated lessons have been successfully imported from YouTube.",
             "courseId", savedCourse.getId(),
             "lessonCount", lessons.size()
         ));
@@ -109,7 +108,7 @@ public class AdminCourseController {
         course.setDifficulty(courseDetails.getDifficulty());
         
         courseService.saveCourse(course);
-        return ResponseEntity.ok(Map.of("message", "Course updated successfully"));
+        return ResponseEntity.ok(Map.of("message", "The course details have been successfully updated."));
     }
 
     @DeleteMapping("/{id}")
@@ -119,6 +118,6 @@ public class AdminCourseController {
         
         // Custom delete logic in CourseService would be better
         courseService.deleteCourse(id);
-        return ResponseEntity.ok(Map.of("message", "Course deleted successfully"));
+        return ResponseEntity.ok(Map.of("message", "The course and all related content have been successfully deleted."));
     }
 }

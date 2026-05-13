@@ -57,7 +57,7 @@ public class ApiController {
 
     @GetMapping("/dashboard/stats")
     public ResponseEntity<?> getDashboardStats(Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
         Map<String, Object> data = new HashMap<>();
@@ -80,7 +80,7 @@ public class ApiController {
 
     @PostMapping("/lessons/{lessonId}/progress")
     public ResponseEntity<?> updateProgress(@PathVariable Long lessonId, @RequestBody Map<String, Boolean> request, Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
         boolean completed = request.getOrDefault("completed", false);
@@ -92,7 +92,7 @@ public class ApiController {
         // enrollmentService.checkAndCompleteEnrollment(user, lesson.getCourse());
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Progress updated");
+        response.put("message", "Lesson progress has been successfully synchronized.");
         response.put("lessonId", lessonId);
         response.put("courseTitle", lesson.getCourse().getTitle());
         response.put("studentId", user.getId());
@@ -102,19 +102,19 @@ public class ApiController {
 
     @PostMapping("/lessons/{lessonId}/complete")
     public ResponseEntity<?> completeLesson(@PathVariable Long lessonId, Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
         enrollmentService.updateLessonProgress(user.getId(), lessonId, true);
         
-        return ResponseEntity.ok(Map.of("message", "Lesson marked as complete", "pointsEarned", 10));
+        return ResponseEntity.ok(Map.of("message", "Well done! The lesson has been marked as complete and points have been awarded.", "pointsEarned", 10));
     }
 
     @PostMapping("/courses/{courseId}/quiz/submit")
     public ResponseEntity<?> submitQuiz(@PathVariable Long courseId, 
                                         @Valid @RequestBody QuizSubmissionRequest request, 
                                         Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
         int score = request.getScore();
@@ -122,17 +122,17 @@ public class ApiController {
         
         // Validate courseId matches path variable
         if (!course.getId().equals(courseId)) {
-            return ResponseEntity.badRequest().body("Course ID mismatch");
+            return ResponseEntity.badRequest().body("Invalid request: The course identifier provided does not match the expected resource.");
         }
         
         Map<String, Object> response = new HashMap<>();
         if (score >= 80) {
             enrollmentService.completeCourse(user.getId(), courseId);
             response.put("passed", true);
-            response.put("message", "Congratulations! You passed the course.");
+            response.put("message", "Congratulations! You have successfully passed the final assessment.");
         } else {
             response.put("passed", false);
-            response.put("message", "You did not pass. Please try again.");
+            response.put("message", "Assessment unsuccessful. Review the materials and please try again.");
         }
         
         response.put("score", score);
@@ -145,7 +145,7 @@ public class ApiController {
     @PostMapping("/gamification/add-points")
     public ResponseEntity<?> addPoints(@Valid @RequestBody PointsRequest request, 
                                        Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
 
         int points = request.getPoints();
@@ -161,7 +161,7 @@ public class ApiController {
         userService.updateUser(user);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Points added successfully");
+        response.put("message", "Points have been successfully credited to your account.");
         response.put("totalPoints", user.getPoints());
         response.put("actionType", request.getActionType());
         response.put("entityId", request.getEntityId());
@@ -171,7 +171,7 @@ public class ApiController {
 
     @GetMapping("/certificates/fix")
     public ResponseEntity<?> fixCertificates(Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
         List<com.ruraledu.entity.Enrollment> completed = enrollmentRepository.findByStudentId(user.getId())
@@ -181,12 +181,12 @@ public class ApiController {
             certificateService.generateCertificate(user, e.getCourse());
         }
         
-        return ResponseEntity.ok("Regeneration triggered for " + completed.size() + " courses");
+        return ResponseEntity.ok("Certificate regeneration has been successfully initiated for " + completed.size() + " courses.");
     }
 
     @GetMapping("/certificates")
     public ResponseEntity<?> getCertificates(Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         List<com.ruraledu.entity.Certificate> certificates = certificateRepository.findByUserId(user.getId());
         
@@ -206,12 +206,13 @@ public class ApiController {
     public ResponseEntity<?> toggleLowBandwidth(@RequestBody Map<String, Boolean> request, jakarta.servlet.http.HttpSession session) {
         boolean enabled = request.getOrDefault("enabled", false);
         session.setAttribute("lowBandwidthMode", enabled);
-        return ResponseEntity.ok(Map.of("message", "Low bandwidth mode " + (enabled ? "enabled" : "disabled"), "enabled", enabled));
+        String msg = enabled ? "Optimized low-bandwidth mode has been enabled for a smoother experience." : "Standard bandwidth mode has been restored.";
+        return ResponseEntity.ok(Map.of("message", msg, "enabled", enabled));
     }
 
     @GetMapping("/certificates/{courseId}/download")
     public ResponseEntity<?> downloadCertificate(@PathVariable Long courseId, Authentication authentication) {
-        if (authentication == null) return ResponseEntity.status(401).body("Not authenticated");
+        if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
         
         try {
@@ -225,7 +226,7 @@ public class ApiController {
         } catch (CourseNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error reading certificate file");
+            return ResponseEntity.status(500).body("An error occurred while retrieving the certificate document. Please contact support if the problem persists.");
         }
     }
 }

@@ -35,7 +35,7 @@ public class QuizController {
 
         Quiz quiz = course.getQuiz();
         if (quiz == null) {
-            return ResponseEntity.status(404).body("No quiz available");
+            return ResponseEntity.status(404).body(Map.of("message", "No assessment quiz is currently available for this course."));
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -109,6 +109,6 @@ public class QuizController {
         course.setQuiz(quiz);
         courseRepository.save(course);
 
-        return ResponseEntity.ok(Map.of("message", "Quiz created successfully"));
+        return ResponseEntity.ok(Map.of("message", "The assessment quiz has been successfully created and linked to the course."));
     }
 }

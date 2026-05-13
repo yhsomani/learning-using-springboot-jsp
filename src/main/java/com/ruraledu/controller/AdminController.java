@@ -95,7 +95,7 @@ public class AdminController {
                     user.setEnabled(!user.isEnabled());
                     userRepository.save(user);
                     auditService.log("TOGGLE_STATUS", authentication.getName(), "User", id, "New Status: " + (user.isEnabled() ? "Active" : "Disabled"));
-                    return ResponseEntity.ok(Map.of("message", "User status updated", "enabled", user.isEnabled()));
+                    return ResponseEntity.ok(Map.of("message", "The user's account status has been successfully updated.", "enabled", user.isEnabled()));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -110,7 +110,7 @@ public class AdminController {
                     user.setRole(User.Role.valueOf(updates.get("role")));
                     userRepository.save(user);
                     auditService.log("UPDATE_USER", authentication.getName(), "User", id, "Updated profile details");
-                    return ResponseEntity.ok(Map.of("message", "User updated successfully"));
+                    return ResponseEntity.ok(Map.of("message", "The user's profile information has been successfully updated."));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -123,7 +123,7 @@ public class AdminController {
                     user.setDeleted(true);
                     userRepository.save(user);
                     auditService.log("DELETE_USER", authentication.getName(), "User", id, "Soft deleted user account");
-                    return ResponseEntity.ok(Map.of("message", "User archived successfully"));
+                    return ResponseEntity.ok(Map.of("message", "The user account has been successfully archived."));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -137,9 +137,9 @@ public class AdminController {
             users.forEach(u -> u.setDeleted(true));
             userRepository.saveAll(users);
             auditService.log("BULK_DELETE", authentication.getName(), "User", null, "Archived " + ids.size() + " users");
-            return ResponseEntity.ok(Map.of("message", "Users archived successfully"));
+            return ResponseEntity.ok(Map.of("message", "The selected user accounts have been successfully archived."));
         }
-        return ResponseEntity.badRequest().body(Map.of("message", "No IDs provided"));
+        return ResponseEntity.badRequest().body(Map.of("message", "Invalid request: No user identifiers were provided for the bulk action."));
     }
 
     @GetMapping("/users/export")
