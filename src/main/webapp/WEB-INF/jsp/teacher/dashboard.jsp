@@ -148,23 +148,23 @@
         <div class="col-lg-3">
             <div class="glass p-4 card-glass mb-4">
                 <h6 class="fw-bold text-muted small text-uppercase mb-3">Management</h6>
-                <div class="sidebar-item active">
+                <a href="/teacher/dashboard" class="sidebar-item active text-decoration-none">
                     <i class="bi bi-grid-fill"></i> Dashboard
-                </div>
-                <div class="sidebar-item">
+                </a>
+                <a href="#" class="sidebar-item text-decoration-none">
                     <i class="bi bi-journal-text"></i> My Courses
-                </div>
-                <div class="sidebar-item">
+                </a>
+                <a href="#" class="sidebar-item text-decoration-none">
                     <i class="bi bi-person-badge"></i> Students
-                </div>
-                <div class="sidebar-item">
+                </a>
+                <a href="#" class="sidebar-item text-decoration-none">
                     <i class="bi bi-chat-dots"></i> Q&A Support
-                </div>
+                </a>
                 
                 <h6 class="fw-bold text-muted small text-uppercase mt-5 mb-3">Settings</h6>
-                <div class="sidebar-item">
+                <a href="#" class="sidebar-item text-decoration-none">
                     <i class="bi bi-gear"></i> Portal Settings
-                </div>
+                </a>
             </div>
         </div>
 
@@ -194,8 +194,8 @@
                                     </div>
                                     <div class="col-md-4 text-md-end">
                                         <div class="d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
-                                            <button class="btn btn-outline-success btn-sm rounded-pill px-3"><i class="bi bi-pencil me-1"></i> Edit</button>
-                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3"><i class="bi bi-eye me-1"></i> View</button>
+                                            <a href="#" class="btn btn-outline-success btn-sm rounded-pill px-3"><i class="bi bi-pencil me-1"></i> Edit</a>
+                                            <a href="/student/course/${c.id}" class="btn btn-outline-primary btn-sm rounded-pill px-3"><i class="bi bi-eye me-1"></i> View</a>
                                         </div>
                                     </div>
                                 </div>

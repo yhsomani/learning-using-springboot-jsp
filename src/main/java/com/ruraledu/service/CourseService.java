@@ -71,7 +71,14 @@ public class CourseService {
 
     @Transactional(readOnly = true)
     public Course getCourseById(@org.springframework.lang.NonNull Long id) {
-        return courseRepository.findById(id).orElse(null);
+        Course course = courseRepository.findById(id).orElse(null);
+        if (course != null) {
+            org.hibernate.Hibernate.initialize(course.getLessons());
+            if (course.getQuiz() != null) {
+                org.hibernate.Hibernate.initialize(course.getQuiz().getQuestions());
+            }
+        }
+        return course;
     }
 
     @Transactional(readOnly = true)
