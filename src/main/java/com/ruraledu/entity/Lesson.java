@@ -17,11 +17,8 @@ public class Lesson {
     @JsonIgnore
     private Course course;
 
-    @Column(nullable = false)
+    @Column(name = "video_id", nullable = false)
     private String videoId;
-
-    @Column(name = "video_id")
-    private String youtubeVideoId;
 
     @Column(nullable = false)
     private String title;
@@ -48,8 +45,10 @@ public class Lesson {
     public void setCourse(Course course) { this.course = course; }
     public String getVideoId() { return videoId; }
     public void setVideoId(String videoId) { this.videoId = videoId; }
-    public String getYoutubeVideoId() { return youtubeVideoId; }
-    public void setYoutubeVideoId(String youtubeVideoId) { this.youtubeVideoId = youtubeVideoId; }
+    
+    // Bridge methods for YouTube service
+    public String getYoutubeVideoId() { return videoId; }
+    public void setYoutubeVideoId(String youtubeVideoId) { this.videoId = youtubeVideoId; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }

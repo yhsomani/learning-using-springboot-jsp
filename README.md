@@ -473,7 +473,9 @@ docker run -p 8081:8081 \
 
 4. **Stabilization Audit (May 2026)**:
    - **Resolved**: Fixed `YoutubeService` test failure in `CourseImportTest` by correcting method signatures.
+   - **Modernization**: Integrated `YoutubeExtractor` with fallback strategies and introduced `VideoMetadata` DTO for improved type safety.
    - **Cleanup**: Eliminated over 20 compiler warnings related to null-safety and unused imports.
+   - **Fixes**: Resolved import errors for `ValidationResult` and type mismatches in `AdminCourseController`.
    - **RBAC**: Verified and stabilized role-based access control across all dashboards.
    - **Dependency**: Fixed 500 runtime errors by restoring the missing JSTL API dependency.
    - **Data Flow**: Resolved `LazyInitializationException` in course view by explicitly initializing lazy collections.

@@ -10,7 +10,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Map;
+import com.ruraledu.dto.VideoMetadata;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -43,7 +43,7 @@ public class YoutubeServiceTest {
                 .andRespond(withSuccess(mockHtml, MediaType.TEXT_HTML));
 
         // Execute
-        List<Map<String, Object>> result = youtubeService.fetchPlaylistVideos(playlistId);
+        List<VideoMetadata> result = youtubeService.fetchPlaylistVideos(playlistId);
 
         // Verify that the mock server was called as expected
         mockServer.verify();
@@ -51,8 +51,8 @@ public class YoutubeServiceTest {
         // Check the results
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("vid1", result.get(0).get("videoId"));
-        assertEquals("Test Video 1", result.get(0).get("title"));
+        assertEquals("vid1", result.get(0).getVideoId());
+        assertEquals("Test Video 1", result.get(0).getTitle());
     }
 
     @Test

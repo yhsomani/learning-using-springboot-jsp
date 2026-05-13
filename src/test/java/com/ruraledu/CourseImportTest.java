@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import java.util.List;
-import java.util.Map;
+import com.ruraledu.dto.VideoMetadata;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -29,15 +29,15 @@ public class CourseImportTest {
     @SuppressWarnings("null")
     public void testScraperResilience() {
         String id = youtubeService.extractPlaylistId(TEST_PLAYLIST_URL);
-        List<Map<String, Object>> videos = youtubeService.fetchPlaylistVideos(id);
+        List<VideoMetadata> videos = youtubeService.fetchPlaylistVideos(id);
         
         // This test requires internet access. If environment blocks it, we check for non-null at least.
         assertNotNull(videos);
         if (!videos.isEmpty()) {
             System.out.println("Successfully scraped " + videos.size() + " videos from the roadmap playlist.");
             assertTrue(videos.size() > 0);
-            assertNotNull(videos.get(0).get("videoId"));
-            assertNotNull(videos.get(0).get("title"));
+            assertNotNull(videos.get(0).getVideoId());
+            assertNotNull(videos.get(0).getTitle());
         } else {
             System.out.println("Scraper returned empty list (possibly blocked by YouTube or no internet).");
         }

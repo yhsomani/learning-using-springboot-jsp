@@ -7,6 +7,7 @@ import com.ruraledu.repository.CourseRepository;
 import com.ruraledu.service.YoutubeService;
 import com.ruraledu.service.UserService;
 import com.ruraledu.service.CourseService;
+import com.ruraledu.dto.VideoMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -67,21 +68,21 @@ public class AdminCourseController {
         course.setYoutubePlaylistUrl(playlistUrl);
         course.setTeacher(admin);
 
-        List<Map<String, Object>> videoItems = youtubeService.fetchPlaylistVideos(playlistId);
+        List<VideoMetadata> videoItems = youtubeService.fetchPlaylistVideos(playlistId);
         if (videoItems.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Unable to retrieve videos from the playlist. Please verify that the playlist is public and contains valid videos."));
         }
 
         // Use first video thumbnail as course thumbnail
-        course.setThumbnail((String) videoItems.get(0).get("thumbnail"));
+        course.setThumbnail(videoItems.get(0).getThumbnail());
         
         List<Lesson> lessons = videoItems.stream().map(item -> {
             return new Lesson(
                     null, // Course will be set by service
-                    (String) item.get("videoId"),
-                    (String) item.get("title"),
-                    (String) item.get("thumbnail"),
-                    (Integer) item.get("orderIndex")
+                    item.getVideoId(),
+                    item.getTitle(),
+                    item.getThumbnail(),
+                    item.getOrderIndex()
             );
         }).collect(Collectors.toList());
 

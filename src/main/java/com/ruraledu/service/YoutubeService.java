@@ -8,7 +8,7 @@ import com.ruraledu.entity.Lesson;
 import com.ruraledu.repository.CourseRepository;
 import com.ruraledu.repository.LessonRepository;
 import com.ruraledu.service.extractor.YoutubeExtractor;
-import com.ruraledu.service.extractor.ValidationResult;
+import com.ruraledu.service.extractor.YoutubeExtractor.ValidationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
