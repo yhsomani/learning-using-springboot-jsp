@@ -376,7 +376,7 @@ public class YoutubeExtractor {
         }
         
         // Check if it's a video URL
-        if (url.contains("/watch") || url.contains("youtu.be")) {
+        if (url.contains("/watch") || url.contains("youtu.be") || url.contains("/embed/")) {
             String videoId = extractVideoIdFromUrl(url);
             if (videoId == null || videoId.isEmpty()) {
                 return new ValidationResult(false, "Invalid video URL format", null, null);
@@ -521,7 +521,11 @@ public class YoutubeExtractor {
             return null;
         }
         
-        String id = url.split("list=")[1];
+        String[] parts = url.split("list=");
+        if (parts.length < 2) {
+            return null;
+        }
+        String id = parts[1];
         int ampersandIndex = id.indexOf("&");
         if (ampersandIndex != -1) {
             id = id.substring(0, ampersandIndex);
