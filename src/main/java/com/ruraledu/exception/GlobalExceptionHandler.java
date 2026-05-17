@@ -53,8 +53,8 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "A system error occurred while processing your request. Our technical team has been notified. Please try again later."));
         }
-        // Use 404 page as fallback since no 500.jsp exists
-        ModelAndView mav = new ModelAndView("error/404");
+        // SEC-02 fix: use dedicated 500.jsp instead of reusing 404 page
+        ModelAndView mav = new ModelAndView("error/500");
         mav.addObject("message", "A system error occurred while processing your request. Our technical team has been notified. Please try again later.");
         return mav;
     }

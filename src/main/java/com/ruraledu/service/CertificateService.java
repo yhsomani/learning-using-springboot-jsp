@@ -11,6 +11,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @Service
 public class CertificateService {
+
     @Autowired
     private CertificateRepository certificateRepository;
+
+    /**
+     * CERT-01 fix: Configurable storage path via application property.
+     * Defaults to 'certificates' subdirectory in the working directory.
+     * In production / Docker, set certificate.storage.path to an absolute path
+     * (e.g., /data/certificates or a mounted volume path).
+     */
+    @Value("${certificate.storage.path:${user.dir}/certificates}")
+    private String certificateStoragePath;
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CertificateService.class);
 
@@ -40,11 +53,13 @@ public class CertificateService {
                 return;
             }
 
+            // CERT-01 fix: Always resolve to an absolute path
             String fileName = "certificate_" + student.getId() + "_" + course.getId() + ".pdf";
-            String relativePath = "certificates/" + fileName;
-            File file = new File(relativePath);
-            
-            logger.debug("Certificate file path: {}", file.getAbsolutePath());
+            Path storagePath = Paths.get(certificateStoragePath).toAbsolutePath();
+            Path filePath = storagePath.resolve(fileName);
+            File file = filePath.toFile();
+
+            logger.debug("Certificate absolute file path: {}", file.getAbsolutePath());
 
             if (!file.getParentFile().exists()) {
                 boolean created = file.getParentFile().mkdirs();
@@ -76,7 +91,6 @@ public class CertificateService {
                     contentStream.endText();
                 }
 
-                // Optimization: Use BufferedOutputStream for faster file I/O
                 try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file))) {
                     document.save(bos);
                 }
@@ -87,12 +101,13 @@ public class CertificateService {
             Certificate cert = new Certificate();
             cert.setUser(student);
             cert.setCourse(course);
-            cert.setCertificateUrl(relativePath); // Store relative path
+            // CERT-01 fix: Store absolute path so file can always be resolved
+            cert.setCertificateUrl(file.getAbsolutePath());
             cert.setIssuedDate(LocalDateTime.now());
             certificateRepository.save(cert);
 
         } catch (Exception e) {
-            logger.error("Error generating certificate for student {} in course {}: {}", 
+            logger.error("Error generating certificate for student {} in course {}: {}",
                          student.getUsername(), course.getTitle(), e.getMessage(), e);
         }
     }
@@ -101,10 +116,10 @@ public class CertificateService {
     public byte[] getCertificateData(Long studentId, Long courseId) throws java.io.IOException {
         Certificate cert = certificateRepository.findByUserIdAndCourseId(studentId, courseId).orElse(null);
         if (cert == null) throw new CourseNotFoundException("Certificate not found for student " + studentId + " in course " + courseId);
-        
+
         File file = new File(cert.getCertificateUrl());
         if (!file.exists()) return null;
-        
+
         return java.nio.file.Files.readAllBytes(file.toPath());
     }
 }

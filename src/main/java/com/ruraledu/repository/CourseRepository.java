@@ -39,6 +39,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Override
     @org.springframework.lang.NonNull
+    @EntityGraph(attributePaths = {"teacher"})
+    @Query("SELECT c FROM Course c WHERE c.deleted = false")
     List<Course> findAll();
 
     // New arrivals - properly limited via Pageable

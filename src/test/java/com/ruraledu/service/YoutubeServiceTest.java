@@ -2,51 +2,48 @@ package com.ruraledu.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.ArrayList;
 import com.ruraledu.dto.VideoMetadata;
+import com.ruraledu.service.extractor.YoutubeExtractor;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.Mockito.*;
 
 public class YoutubeServiceTest {
 
+    @Mock
+    private YoutubeExtractor youtubeExtractor;
+
+    @InjectMocks
     private YoutubeService youtubeService;
-    private MockRestServiceServer mockServer;
 
     @BeforeEach
     public void setUp() {
-        youtubeService = new YoutubeService();
-        RestTemplate restTemplate = (RestTemplate) ReflectionTestUtils.getField(youtubeService, "restTemplate");
-        mockServer = MockRestServiceServer.createServer(restTemplate);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testFetchPlaylistVideosScraperSuccess() {
         String playlistId = "TEST_PLAYLIST_ID";
 
-        // Mock the YouTube playlist page call to return dummy HTML
-        String mockHtml = "<html><body><script>var ytInitialData = {\"contents\":{\"twoColumnBrowseResultsRenderer\":{\"tabs\":[{\"tabRenderer\":{\"content\":{\"sectionListRenderer\":{\"contents\":[{\"itemSectionRenderer\":{\"contents\":[{\"playlistVideoListRenderer\":{\"contents\":[{\"playlistVideoRenderer\":{\"videoId\":\"vid1\",\"title\":{\"runs\":[{\"text\":\"Test Video 1\"}]}}}]}}]}}]}}}}]}}};</script></body></html>";
+        List<VideoMetadata> mockVideos = new ArrayList<>();
+        VideoMetadata video = new VideoMetadata();
+        video.setVideoId("vid1");
+        video.setTitle("Test Video 1");
+        mockVideos.add(video);
 
-        mockServer.expect(requestTo(startsWith("https://www.youtube.com/playlist?list=" + playlistId)))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess(mockHtml, MediaType.TEXT_HTML));
+        when(youtubeExtractor.extractPlaylistVideos(playlistId)).thenReturn(mockVideos);
 
         // Execute
         List<VideoMetadata> result = youtubeService.fetchPlaylistVideos(playlistId);
 
-        // Verify that the mock server was called as expected
-        mockServer.verify();
+        // Verify that the extractor was called
+        verify(youtubeExtractor, times(1)).extractPlaylistVideos(playlistId);
 
         // Check the results
         assertNotNull(result);

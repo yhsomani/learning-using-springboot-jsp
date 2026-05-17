@@ -76,6 +76,7 @@ public class ApiController {
         return ResponseEntity.ok(data);
     }
 
+    @PutMapping("/lessons/{lessonId}/progress")
     public ResponseEntity<?> updateProgress(@PathVariable @org.springframework.lang.NonNull Long lessonId, @RequestBody Map<String, Boolean> request, Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
         User user = userService.findByUsername(authentication.getName()).orElseThrow();
@@ -107,6 +108,7 @@ public class ApiController {
         return ResponseEntity.ok(Map.of("message", "Well done! The lesson has been marked as complete and points have been awarded.", "pointsEarned", 10));
     }
 
+    @PostMapping("/quiz/{courseId}/submit")
     public ResponseEntity<?> submitQuiz(@PathVariable @org.springframework.lang.NonNull Long courseId, 
                                         @Valid @RequestBody QuizSubmissionRequest request, 
                                         Authentication authentication) {
@@ -138,7 +140,7 @@ public class ApiController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/gamification/add-points")
+    @PostMapping("/gamification/points")
     public ResponseEntity<?> addPoints(@Valid @RequestBody PointsRequest request, 
                                        Authentication authentication) {
         if (authentication == null) return ResponseEntity.status(401).body("Authentication required: Please log in to access this resource.");
@@ -229,9 +231,8 @@ public class ApiController {
     @Autowired
     private com.ruraledu.service.YoutubeService youtubeService;
 
-    @PostMapping("/youtube/validate")
-    public ResponseEntity<?> validateYoutubeUrl(@RequestBody Map<String, String> request) {
-        String url = request.get("url");
+    @GetMapping("/youtube/validate")
+    public ResponseEntity<?> validateYoutubeUrl(@RequestParam String url) {
         if (url == null || url.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of(
                 "valid", false,
@@ -241,7 +242,7 @@ public class ApiController {
         }
 
         try {
-            Map<String, Object> result = youtubeService.validateYoutubeUrl(url);
+            Map<String, Object> result = youtubeService.validateYoutubeUrl(url.trim());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of(
@@ -252,7 +253,7 @@ public class ApiController {
         }
     }
 
-    @PostMapping("/youtube/import-playlist")
+    @PostMapping("/youtube/import")
     public ResponseEntity<?> importPlaylist(@RequestBody Map<String, Object> request, Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(401).body(Map.of(
@@ -312,7 +313,7 @@ public class ApiController {
         }
     }
 
-    @PostMapping("/youtube/sync-course/{courseId}")
+    @PostMapping("/youtube/sync/{courseId}")
     public ResponseEntity<?> syncCourseWithPlaylist(@PathVariable Long courseId, Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(401).body(Map.of(

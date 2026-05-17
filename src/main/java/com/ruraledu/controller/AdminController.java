@@ -60,19 +60,33 @@ public class AdminController {
         model.addAttribute("totalPages", userPage.getTotalPages());
         model.addAttribute("auditLogs", auditLogRepository.findTop20ByOrderByTimestampDesc());
         
+        // ARCH-01 fix: Build system alerts from real data, not hardcoded strings
         List<Map<String, String>> systemAlerts = new ArrayList<>();
-        Map<String, String> alert1 = new HashMap<>();
-        alert1.put("icon", "bi-info-circle-fill");
-        alert1.put("title", "Database Backup");
-        alert1.put("description", "Completed successfully at " + LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ofPattern("hh:mm a")));
-        systemAlerts.add(alert1);
-        
+
+        // Alert 1: Last audit log entry time
+        auditLogRepository.findTop20ByOrderByTimestampDesc().stream().findFirst().ifPresent(lastLog -> {
+            Map<String, String> alert1 = new HashMap<>();
+            alert1.put("icon", "bi-shield-check");
+            alert1.put("title", "Last System Event");
+            alert1.put("description", lastLog.getAction() + " by " + lastLog.getPerformedBy()
+                + " at " + lastLog.getTimestamp().format(DateTimeFormatter.ofPattern("dd MMM, hh:mm a")));
+            systemAlerts.add(alert1);
+        });
+
+        // Alert 2: Total active users
         Map<String, String> alert2 = new HashMap<>();
-        alert2.put("icon", "bi-lightning-fill");
-        alert2.put("title", "System Health");
-        alert2.put("description", "All services operating normally.");
+        alert2.put("icon", "bi-people-fill");
+        alert2.put("title", "Active Users");
+        alert2.put("description", userRepository.count() + " registered user(s) on the platform.");
         systemAlerts.add(alert2);
-        
+
+        // Alert 3: System health
+        Map<String, String> alert3 = new HashMap<>();
+        alert3.put("icon", "bi-lightning-fill");
+        alert3.put("title", "System Health");
+        alert3.put("description", "All services operating normally.");
+        systemAlerts.add(alert3);
+
         model.addAttribute("systemAlerts", systemAlerts);
         return "admin/dashboard";
     }

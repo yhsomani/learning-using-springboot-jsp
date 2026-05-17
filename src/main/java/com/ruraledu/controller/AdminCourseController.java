@@ -62,11 +62,13 @@ public class AdminCourseController {
 
         Course course = new Course();
         course.setTitle(title);
-        course.setDescription(description);
-        course.setCategory(category);
-        course.setDifficulty(difficulty);
+        course.setDescription(description != null ? description : "");
+        course.setCategory(category != null ? category : "General");
+        course.setDifficulty(difficulty != null ? difficulty : "BEGINNER");
         course.setYoutubePlaylistUrl(playlistUrl);
+        course.setYoutubePlaylistId(playlistId);
         course.setTeacher(admin);
+        course.setTeacherId(admin.getId());
 
         List<VideoMetadata> videoItems = youtubeService.fetchPlaylistVideos(playlistId);
         if (videoItems.isEmpty()) {
@@ -77,13 +79,17 @@ public class AdminCourseController {
         course.setThumbnail(videoItems.get(0).getThumbnail());
         
         List<Lesson> lessons = videoItems.stream().map(item -> {
-            return new Lesson(
+            Lesson lesson = new Lesson(
                     null, // Course will be set by service
                     item.getVideoId(),
                     item.getTitle(),
                     item.getThumbnail(),
                     item.getOrderIndex()
             );
+            lesson.setDescription(item.getDescription() != null ? item.getDescription() : "");
+            lesson.setVideoUrl("https://www.youtube.com/watch?v=" + item.getVideoId());
+            lesson.setDuration(item.getDuration());
+            return lesson;
         }).collect(Collectors.toList());
 
         if (lessons.isEmpty()) {

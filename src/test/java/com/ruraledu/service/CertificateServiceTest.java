@@ -34,6 +34,11 @@ public class CertificateServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        // Inject the required property value that would normally be provided by Spring
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            certificateService, "certificateStoragePath", System.getProperty("user.dir") + "/certificates");
+
         student = new User();
         student.setId(1L);
         student.setUsername("testuser");

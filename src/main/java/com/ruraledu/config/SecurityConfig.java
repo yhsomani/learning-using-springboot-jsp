@@ -22,13 +22,12 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf
+                // Only disable CSRF for form endpoints that are protected by Spring Security itself.
+                // /api/** endpoints rely on the XSRF-TOKEN cookie sent in X-XSRF-TOKEN header.
                 .ignoringRequestMatchers(
-                    "/h2-console/**",  // Only for dev, remove in production
-                    "/api/public/**",  // Public APIs are read-only, no state changes
-                    "/api/admin/**",   // Allow admin API calls from dashboard
-                    "/login",          // Form login POST
-                    "/logout",         // Logout POST
-                    "/register"        // Registration POST
+                    "/login",      // Spring Security manages the form login POST
+                    "/logout",     // Spring Security manages logout
+                    "/register"    // Registration form POST
                 )
             )
             .authorizeHttpRequests(auth -> auth
